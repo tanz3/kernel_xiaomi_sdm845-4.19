@@ -27,7 +27,7 @@
 static struct cam_mem_table tbl;
 static atomic_t cam_mem_mgr_state = ATOMIC_INIT(CAM_MEM_MGR_UNINITIALIZED);
 
-static int cam_mem_util_map_cpu_va(struct dma_buf *buf,
+static int cam_mem_util_map_cpu_va(struct dma_buf *dmabuf,
 	uintptr_t *vaddr,
 	size_t *len)
 {
@@ -38,9 +38,11 @@ static int cam_mem_util_map_cpu_va(struct dma_buf *buf,
 	 * dma_buf_begin_cpu_access() and dma_buf_end_cpu_access()
 	 * need to be called in pair to avoid stability issue.
 	 */
-	rc = dma_buf_begin_cpu_access(buf, DMA_BIDIRECTIONAL);
-	if (rc)
+	rc = dma_buf_begin_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+	if (rc) {
+		CAM_ERR(CAM_SMMU, "dma begin access failed rc=%d", rc);
 		return rc;
+	}
 
 	/*
 	 * Code could be simplified if ION support of dma_buf_vmap is
@@ -49,29 +51,61 @@ static int cam_mem_util_map_cpu_va(struct dma_buf *buf,
 	 * to _kmap each individual page and then only use the virtual
 	 * address returned from the first call to _kmap.
 	 */
-	for (i = 0; i < PAGE_ALIGN(buf->size) / PAGE_SIZE; i++) {
-		addr = dma_buf_kmap(buf, i);
+	for (i = 0; i < PAGE_ALIGN(dmabuf->size) / PAGE_SIZE; i++) {
+		addr = dma_buf_kmap(dmabuf, i);
 		if (IS_ERR_OR_NULL(addr)) {
 			CAM_ERR(CAM_MEM, "kernel map fail");
 			for (j = 0; j < i; j++)
-				dma_buf_kunmap(buf,
+				dma_buf_kunmap(dmabuf,
 					j,
-					(void *)(*vaddr + j * PAGE_SIZE));
+					(void *)(*vaddr + (j * PAGE_SIZE)));
 			*vaddr = 0;
 			*len = 0;
 			rc = -ENOSPC;
 			goto fail;
 		}
 		if (i == 0)
-			*vaddr = *(uint64_t *)addr;
+			*vaddr = (uint64_t)addr;
 	}
 
-	*len = buf->size;
+	*len = dmabuf->size;
 
 	return 0;
 
 fail:
-	dma_buf_end_cpu_access(buf, DMA_BIDIRECTIONAL);
+	dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+	return rc;
+}
+
+static int cam_mem_util_unmap_cpu_va(struct dma_buf *dmabuf,
+	uint64_t vaddr)
+{
+	int i, rc = 0, page_num;
+
+	if (!dmabuf || !vaddr) {
+		CAM_ERR(CAM_CRM, "Invalid input args %pK %llX", dmabuf, vaddr);
+		return -EINVAL;
+	}
+
+	page_num = PAGE_ALIGN(dmabuf->size) / PAGE_SIZE;
+
+	for (i = 0; i < page_num; i++) {
+		dma_buf_kunmap(dmabuf, i,
+			(void *)(vaddr + (i * PAGE_SIZE)));
+	}
+
+	/*
+	 * dma_buf_begin_cpu_access() and
+	 * dma_buf_end_cpu_access() need to be called in pair
+	 * to avoid stability issue.
+	 */
+	rc = dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+	if (rc) {
+		CAM_ERR(CAM_CRM, "Failed in end cpu access, dmabuf=%pK",
+			dmabuf);
+		return rc;
+	}
+
 	return rc;
 }
 
@@ -355,6 +389,13 @@ static int cam_mem_util_get_dma_buf_fd(size_t len,
 		goto get_fd_fail;
 	}
 
+	/*
+	 * increment the ref count so that ref count becomes 2 here
+	 * when we close fd, refcount becomes 1 and when we do
+	 * dmap_put_buf, ref count becomes 0 and memory will be freed.
+	 */
+	dma_buf_get(*fd);
+
 	return rc;
 
 get_fd_fail:
@@ -461,12 +502,15 @@ static int cam_mem_util_map_hw_va(uint32_t flags,
 		return dir;
 	}
 
+	CAM_DBG(CAM_CRM, "map_hw_va : flags = %x, dir=%d, num_hdls=%d",
+		flags, dir, num_hdls);
+
 	if (flags & CAM_MEM_FLAG_PROTECTED_MODE) {
 		for (i = 0; i < num_hdls; i++) {
 			rc = cam_smmu_map_stage2_iova(mmu_hdls[i],
 				fd,
 				dir,
-				(dma_addr_t *)hw_vaddr,
+				hw_vaddr,
 				len);
 
 			if (rc < 0) {
@@ -509,8 +553,8 @@ int cam_mem_mgr_alloc_and_map(struct cam_mem_mgr_alloc_cmd *cmd)
 {
 	int rc;
 	int32_t idx;
-	struct dma_buf *dmabuf;
-	int fd;
+	struct dma_buf *dmabuf = NULL;
+	int fd = -1;
 	dma_addr_t hw_vaddr = 0;
 	size_t len;
 
@@ -566,8 +610,11 @@ int cam_mem_mgr_alloc_and_map(struct cam_mem_mgr_alloc_cmd *cmd)
 			&hw_vaddr,
 			&len,
 			region);
-		if (rc)
+
+		if (rc) {
+			CAM_ERR(CAM_CRM, "Failed in map_hw_va, rc=%d", rc);
 			goto map_hw_fail;
+		}
 	}
 
 	mutex_lock(&tbl.bufq[idx].q_lock);
@@ -714,6 +761,10 @@ static int cam_mem_util_unmap_hw_va(int32_t idx,
 	num_hdls = tbl.bufq[idx].num_hdl;
 	fd = tbl.bufq[idx].fd;
 
+	CAM_DBG(CAM_CRM,
+		"unmap_hw_va : fd=%x, flags=0x%x, num_hdls=%d, client=%d",
+		fd, flags, num_hdls, client);
+
 	if (flags & CAM_MEM_FLAG_PROTECTED_MODE) {
 		for (i = 0; i < num_hdls; i++) {
 			rc = cam_smmu_unmap_stage2_iova(mmu_hdls[i], fd);
@@ -793,6 +844,7 @@ static int cam_mem_mgr_cleanup_table(void)
 		mutex_unlock(&tbl.bufq[i].q_lock);
 		mutex_destroy(&tbl.bufq[i].q_lock);
 	}
+
 	bitmap_zero(tbl.bitmap, tbl.bits);
 	/* We need to reserve slot 0 because 0 is invalid */
 	set_bit(0, tbl.bitmap);
@@ -816,10 +868,8 @@ void cam_mem_mgr_deinit(void)
 static int cam_mem_util_unmap(int32_t idx,
 	enum cam_smmu_mapping_client client)
 {
-	int i, rc = 0, page_num;
+	int rc = 0;
 	enum cam_smmu_region_id region = CAM_SMMU_REGION_SHARED;
-	struct dma_buf *dmabuf = NULL;
-	uint64_t kvaddr;
 
 	if (idx >= CAM_MEM_BUFQ_MAX || idx <= 0) {
 		CAM_ERR(CAM_MEM, "Incorrect index");
@@ -837,23 +887,19 @@ static int cam_mem_util_unmap(int32_t idx,
 		return 0;
 	}
 
-
-	if (tbl.bufq[idx].flags & CAM_MEM_FLAG_KMD_ACCESS)
-		if (tbl.bufq[idx].dma_buf && tbl.bufq[idx].kmdvaddr)
-			dmabuf = tbl.bufq[idx].dma_buf;
-			page_num = PAGE_ALIGN(dmabuf->size) / PAGE_SIZE;
-			kvaddr = tbl.bufq[idx].kmdvaddr;
-			for (i = 0; i < page_num; i++)
-				dma_buf_kunmap(dmabuf, i,
-					(void *)(kvaddr + i * PAGE_SIZE));
-
-	/*
-	 * dma_buf_begin_cpu_access() and dma_buf_end_cpu_access()
-	 * need to be called in pair to avoid stability issue.
-	 */
-	rc = dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
-	if (rc)
-		return rc;
+	if (tbl.bufq[idx].flags & CAM_MEM_FLAG_KMD_ACCESS) {
+		if (tbl.bufq[idx].dma_buf && tbl.bufq[idx].kmdvaddr) {
+			rc = cam_mem_util_unmap_cpu_va(tbl.bufq[idx].dma_buf,
+				tbl.bufq[idx].kmdvaddr);
+			if (rc) {
+				CAM_ERR(CAM_CRM,
+					"Failed, dmabuf=%pK, kmdvaddr=%pK",
+					tbl.bufq[idx].dma_buf,
+					tbl.bufq[idx].kmdvaddr);
+				return rc;
+			}
+		}
+	}
 
 	/* SHARED flag gets precedence, all other flags after it */
 	if (tbl.bufq[idx].flags & CAM_MEM_FLAG_HW_SHARED_ACCESS) {
@@ -933,7 +979,7 @@ int cam_mem_mgr_release(struct cam_mem_mgr_release_cmd *cmd)
 		return -EINVAL;
 	}
 
-	CAM_DBG(CAM_MEM, "Releasing hdl = %u", cmd->buf_handle);
+	CAM_DBG(CAM_MEM, "Releasing hdl = %x", cmd->buf_handle);
 	rc = cam_mem_util_unmap(idx, CAM_SMMU_MAPPING_USER);
 
 	return rc;
@@ -954,7 +1000,6 @@ int cam_mem_mgr_request_mem(struct cam_mem_mgr_request_desc *inp,
 	int32_t idx;
 	int32_t smmu_hdl = 0;
 	int32_t num_hdl = 0;
-	int i;
 
 	enum cam_smmu_region_id region = CAM_SMMU_REGION_SHARED;
 
@@ -995,6 +1040,11 @@ int cam_mem_mgr_request_mem(struct cam_mem_mgr_request_desc *inp,
 		CAM_DBG(CAM_MEM, "Got dma_buf = %pK", buf);
 	}
 
+	/*
+	 * we are mapping kva always here,
+	 * update flags so that we do unmap properly
+	 */
+	inp->flags |= CAM_MEM_FLAG_KMD_ACCESS;
 	rc = cam_mem_util_map_cpu_va(buf, &kvaddr, &request_len);
 	if (rc) {
 		CAM_ERR(CAM_MEM, "Failed to get kernel vaddr");
@@ -1063,10 +1113,9 @@ int cam_mem_mgr_request_mem(struct cam_mem_mgr_request_desc *inp,
 	return rc;
 slot_fail:
 	cam_smmu_unmap_kernel_iova(inp->smmu_hdl,
-	buf, region);
+		buf, region);
 smmu_fail:
-	for (i = 0; i < PAGE_ALIGN(buf->size) / PAGE_SIZE; i++)
-		dma_buf_kunmap(buf, i, (void *)(kvaddr + i * PAGE_SIZE));
+	cam_mem_util_unmap_cpu_va(buf, kvaddr);
 map_fail:
 	dma_buf_put(buf);
 ion_fail:
