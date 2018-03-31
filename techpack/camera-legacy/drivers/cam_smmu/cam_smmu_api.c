@@ -1786,7 +1786,7 @@ static int cam_smmu_map_buffer_validate(struct dma_buf *buf,
 		}
 
 		*paddr_ptr = sg_dma_address(table->sgl);
-		*len_ptr = (size_t)sg_dma_len(table->sgl);
+		*len_ptr = (size_t)buf->size;
 		iommu_cb_set.cb_info[idx].io_mapping_size += *len_ptr;
 	} else {
 		CAM_ERR(CAM_SMMU, "Error: Wrong region id passed");
