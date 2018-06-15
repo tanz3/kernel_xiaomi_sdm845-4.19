@@ -83,7 +83,7 @@ static int cam_mem_util_unmap_cpu_va(struct dma_buf *dmabuf,
 	int i, rc = 0, page_num;
 
 	if (!dmabuf || !vaddr) {
-		CAM_ERR(CAM_CRM, "Invalid input args %pK %llX", dmabuf, vaddr);
+		CAM_ERR(CAM_MEM, "Invalid input args %pK %llX", dmabuf, vaddr);
 		return -EINVAL;
 	}
 
@@ -101,7 +101,7 @@ static int cam_mem_util_unmap_cpu_va(struct dma_buf *dmabuf,
 	 */
 	rc = dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
 	if (rc) {
-		CAM_ERR(CAM_CRM, "Failed in end cpu access, dmabuf=%pK",
+		CAM_ERR(CAM_MEM, "Failed in end cpu access, dmabuf=%pK",
 			dmabuf);
 		return rc;
 	}
@@ -221,13 +221,13 @@ int cam_mem_get_io_buf(int32_t buf_handle, int32_t mmu_handle,
 			iova_ptr,
 			len_ptr);
 	if (rc) {
-		CAM_ERR(CAM_CRM,
+		CAM_ERR(CAM_MEM,
 			"fail to map buf_hdl:0x%x, mmu_hdl: 0x%x for fd:%d",
 			buf_handle, mmu_handle, tbl.bufq[idx].fd);
 		goto handle_mismatch;
 	}
 
-	CAM_DBG(CAM_CRM,
+	CAM_DBG(CAM_MEM,
 		"handle:0x%x fd:%d iova_ptr:%pK len_ptr:%llu",
 		mmu_handle, tbl.bufq[idx].fd, iova_ptr, *len_ptr);
 handle_mismatch:
@@ -511,7 +511,7 @@ static int cam_mem_util_map_hw_va(uint32_t flags,
 		return dir;
 	}
 
-	CAM_DBG(CAM_CRM, "map_hw_va : flags = %x, dir=%d, num_hdls=%d",
+	CAM_DBG(CAM_MEM, "map_hw_va : flags = %x, dir=%d, num_hdls=%d",
 		flags, dir, num_hdls);
 
 	if (flags & CAM_MEM_FLAG_PROTECTED_MODE) {
@@ -621,7 +621,7 @@ int cam_mem_mgr_alloc_and_map(struct cam_mem_mgr_alloc_cmd *cmd)
 			region);
 
 		if (rc) {
-			CAM_ERR(CAM_CRM, "Failed in map_hw_va, rc=%d", rc);
+			CAM_ERR(CAM_MEM, "Failed in map_hw_va, rc=%d", rc);
 			goto map_hw_fail;
 		}
 	}
@@ -770,7 +770,7 @@ static int cam_mem_util_unmap_hw_va(int32_t idx,
 	num_hdls = tbl.bufq[idx].num_hdl;
 	fd = tbl.bufq[idx].fd;
 
-	CAM_DBG(CAM_CRM,
+	CAM_DBG(CAM_MEM,
 		"unmap_hw_va : fd=%x, flags=0x%x, num_hdls=%d, client=%d",
 		fd, flags, num_hdls, client);
 
@@ -901,7 +901,7 @@ static int cam_mem_util_unmap(int32_t idx,
 			rc = cam_mem_util_unmap_cpu_va(tbl.bufq[idx].dma_buf,
 				tbl.bufq[idx].kmdvaddr);
 			if (rc) {
-				CAM_ERR(CAM_CRM,
+				CAM_ERR(CAM_MEM,
 					"Failed, dmabuf=%pK, kmdvaddr=%pK",
 					tbl.bufq[idx].dma_buf,
 					tbl.bufq[idx].kmdvaddr);
