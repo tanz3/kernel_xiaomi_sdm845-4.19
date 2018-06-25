@@ -4,6 +4,7 @@
  */
 /*
  * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
  */
 
 #define pr_fmt(fmt) "%s: " fmt, __func__
@@ -223,8 +224,10 @@ struct qpnp_adc_tm_sensor {
 	bool				thermal_node;
 	uint32_t			scale_type;
 	struct list_head		thr_list;
-	bool				high_thr_triggered;
-	bool				low_thr_triggered;
+	int				high_thr_triggered;
+	int				low_thr_triggered;
+	int				tmp_high_thr_triggered;
+	int				tmp_low_thr_triggered;
 };
 
 struct qpnp_adc_tm_chip {
@@ -2062,6 +2065,57 @@ static irqreturn_t qpnp_adc_tm_low_thr_isr(int irq, void *data)
 	queue_work(chip->low_thr_wq, &chip->trigger_low_thr_work);
 
 	return IRQ_HANDLED;
+}
+
+static void force_enable_int_th(struct qpnp_adc_tm_chip *chip, bool is_low, bool is_high)
+{
+	int i = 0;
+	int rc = 0;
+
+	while (i < chip->max_channels_available) {
+		if (is_low) {
+			if (chip->sensor[i].tmp_low_thr_triggered) {
+				rc = qpnp_adc_tm_activate_trip_type(
+						&chip->sensor[i],
+						ADC_TM_TRIP_HIGH_WARM,
+						THERMAL_TRIP_ACTIVATION_ENABLED);
+				if (rc < 0)
+					pr_err("re-enable high int thr error:%d\n", i);
+
+				chip->sensor[i].low_thr_triggered--;
+			}
+		}
+
+		if (is_high) {
+			if (chip->sensor[i].tmp_high_thr_triggered) {
+				rc = qpnp_adc_tm_activate_trip_type(
+						&chip->sensor[i],
+						ADC_TM_TRIP_LOW_COOL,
+						THERMAL_TRIP_ACTIVATION_ENABLED);
+				if (rc < 0)
+					pr_err("re-enable low int thr error:%d\n", i);
+
+				chip->sensor[i].high_thr_triggered--;
+			}
+		}
+
+		i++;
+	}
+
+}
+
+static void clear_tmp_low_high(struct qpnp_adc_tm_chip *chip)
+{
+	int i = 0;
+
+	while (i < chip->max_channels_available) {
+		if (chip->sensor[i].tmp_low_thr_triggered)
+			chip->sensor[i].tmp_low_thr_triggered = 0;
+		if (chip->sensor[i].tmp_high_thr_triggered)
+			chip->sensor[i].tmp_high_thr_triggered = 0;
+
+		i++;
+	}
 }
 
 static int qpnp_adc_read_temp(void *data, int *temp)

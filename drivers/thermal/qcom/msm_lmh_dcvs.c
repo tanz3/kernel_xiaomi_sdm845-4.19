@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
  */
 
 #define pr_fmt(fmt) "%s:%s " fmt, KBUILD_MODNAME, __func__
@@ -22,6 +23,7 @@
 #include <linux/atomic.h>
 #include <linux/regulator/consumer.h>
 #include <linux/cpufreq.h>
+#include <linux/cpu.h>
 
 #include <asm/smp_plat.h>
 #include <asm/cacheflush.h>
@@ -137,6 +139,7 @@ static void limits_dcvs_get_freq_limits(struct limits_dcvs_hw *hw)
 static unsigned long limits_mitigation_notify(struct limits_dcvs_hw *hw)
 {
 	uint32_t val = 0, max_cpu_ct = 0, max_cpu_limit = 0, idx = 0, cpu = 0;
+	unsigned int i;
 	struct device *cpu_dev = NULL;
 	unsigned long freq_val, max_limit = 0;
 	struct dev_pm_opp *opp_entry;
@@ -184,6 +187,14 @@ static unsigned long limits_mitigation_notify(struct limits_dcvs_hw *hw)
 	if (max_cpu_ct == cpumask_weight(&hw->core_map))
 		max_limit = max_cpu_limit;
 	sched_update_cpu_freq_min_max(&hw->core_map, 0, max_limit);
+
+	get_online_cpus();
+	for_each_online_cpu(i) {
+		pr_debug("Updating policy for cpu%d\n", i);
+		cpufreq_update_policy(i);
+	}
+	put_online_cpus();
+
 	pr_debug("CPU:%d max limit:%lu\n", cpumask_first(&hw->core_map),
 			max_limit);
 	trace_lmh_dcvs_freq(cpumask_first(&hw->core_map), max_limit);
@@ -549,6 +560,41 @@ lmh_freq_limit_show(struct device *dev, struct device_attribute *devattr,
 	return snprintf(buf, PAGE_SIZE, "%lu\n", hw->hw_freq_limit);
 }
 
+/*
+ * The CPUFREQ_ADJUST notifier is used to override the current policy max to
+ * make sure policy max <= hw_freq_limit. The cpufreq framework then does the job
+ * of enforcing the new policy.
+ */
+static int thermal_adjust_notify(struct notifier_block *nb, unsigned long val,
+				void *data)
+{
+	struct cpufreq_policy *policy = data;
+	unsigned int cpu = policy->cpu;
+	struct limits_dcvs_hw *hw = get_dcvsh_hw_from_cpu(cpu);
+
+	switch (val) {
+	case CPUFREQ_ADJUST:
+		if (!hw)
+			break;
+
+		pr_debug("CPU%u policy max before thermal adjust: %u kHz\n",
+			 cpu, policy->max);
+		pr_debug("CPU%u boost max: %lu kHz\n", cpu, hw->hw_freq_limit);
+
+		cpufreq_verify_within_limits(policy, 0, hw->hw_freq_limit);
+
+		pr_debug("CPU%u policy max after boost: %u kHz\n",
+			 cpu, policy->max);
+		break;
+	}
+
+	return NOTIFY_OK;
+}
+
+static struct notifier_block thermal_adjust_nb = {
+	.notifier_call = thermal_adjust_notify,
+};
+
 static int limits_dcvs_probe(struct platform_device *pdev)
 {
 	int ret;
@@ -783,3 +829,11 @@ static struct platform_driver limits_dcvs_driver = {
 	},
 };
 builtin_platform_driver(limits_dcvs_driver);
+
+static int dcvs_cpufreq_notifier_init(void)
+{
+	cpufreq_register_notifier(&thermal_adjust_nb, CPUFREQ_POLICY_NOTIFIER);
+	return 0;
+}
+
+late_initcall(dcvs_cpufreq_notifier_init);
