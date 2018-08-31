@@ -165,6 +165,7 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 {
 	int32_t                 rc = 0;
 	uintptr_t                generic_ptr;
+	uintptr_t                generic_pkt_ptr;
 	struct cam_packet       *csl_packet = NULL;
 	struct cam_cmd_buf_desc *cmd_desc = NULL;
 	uint32_t                *cmd_buf = NULL;
@@ -178,7 +179,7 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	}
 
 	rc = cam_mem_get_cpu_buf((int32_t) cfg_dev->packet_handle,
-		&generic_ptr, &len);
+		&generic_pkt_ptr, &len);
 	if (rc < 0) {
 		CAM_ERR(CAM_CSIPHY, "Failed to get packet Mem address: %d", rc);
 		return rc;
@@ -190,12 +191,13 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 		CAM_ERR(CAM_CSIPHY,
 			"offset is out of bounds: offset: %lld len: %zu",
 			cfg_dev->offset, len);
-		return -EINVAL;
+		rc = -EINVAL;
+		goto rel_pkt_buf;
 	}
 
 	remain_len -= (size_t)cfg_dev->offset;
 	csl_packet = (struct cam_packet *)
-		(generic_ptr + (uint32_t)cfg_dev->offset);
+		(generic_pkt_ptr + (uint32_t)cfg_dev->offset);
 
 	if (cam_packet_util_validate_packet(csl_packet,
 		remain_len)) {
@@ -212,7 +214,7 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	if (rc < 0) {
 		CAM_ERR(CAM_CSIPHY,
 			"Failed to get cmd buf Mem address : %d", rc);
-		return rc;
+		goto rel_pkt_buf;
 	}
 
 	if ((len < sizeof(struct cam_csiphy_info)) ||
@@ -243,6 +245,15 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	if (cam_cmd_csiphy_info->secure_mode == 1)
 		cam_csiphy_update_secure_info(csiphy_dev,
 			cam_cmd_csiphy_info, cfg_dev);
+
+	if (cam_mem_put_cpu_buf(cmd_desc->mem_handle))
+		CAM_WARN(CAM_CSIPHY, "Failed to put cmd buffer: 0x%x",
+			cmd_desc->mem_handle);
+
+rel_pkt_buf:
+	if (cam_mem_put_cpu_buf((int32_t) cfg_dev->packet_handle))
+		CAM_WARN(CAM_CSIPHY, "Failed to put packet Mem address: 0x%x",
+			 cfg_dev->packet_handle);
 
 	return rc;
 }
