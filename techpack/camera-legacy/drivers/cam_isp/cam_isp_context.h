@@ -16,6 +16,7 @@
 
 #include <linux/spinlock.h>
 #include <uapi/media/cam_isp.h>
+#include <uapi/media/cam_defs.h>
 
 #include "cam_context.h"
 #include "cam_isp_hw_mgr_intf.h"
@@ -168,6 +169,9 @@ struct cam_isp_context_state_monitor {
  *                             true, if context is rdi only context
  * @bubble_sof_count:          Atomic variable to check if ctx has any sof's
  *                             while processing bubble
+ * @hw_acquired:               Indicate whether HW resources are acquired
+ * @init_received:             Indicate whether init config packet is received
+ * @split_acquire:             Indicate whether a separate acquire is expected
  *
  */
 struct cam_isp_context {
@@ -194,6 +198,9 @@ struct cam_isp_context {
 		CAM_ISP_CTX_STATE_MONITOR_MAX_ENTRIES];
 	bool                             rdi_only_context;
 	atomic_t                         bubble_sof_count;
+	bool                             hw_acquired;
+	bool                             init_received;
+	bool                             split_acquire;
 };
 
 /**
