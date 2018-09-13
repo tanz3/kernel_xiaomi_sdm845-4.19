@@ -182,6 +182,7 @@ int cam_flash_pmic_power_ops(struct cam_flash_ctrl *fctrl,
 				"Enable Regulator Failed rc = %d", rc);
 			return rc;
 		}
+		fctrl->last_flush_req = 0;
 	}
 
 	if (!regulator_enable) {
@@ -372,6 +373,9 @@ int cam_flash_flush_request(struct cam_req_mgr_flush_request *flush)
 
 	mutex_lock(&fctrl->flash_mutex);
 	if (flush->type == CAM_REQ_MGR_FLUSH_TYPE_ALL) {
+		fctrl->last_flush_req = flush->req_id;
+		CAM_DBG(CAM_FLASH, "last reqest to flush is %lld",
+			flush->req_id);
 		rc = fctrl->func_tbl.flush_req(fctrl, FLUSH_ALL, 0);
 		if (rc) {
 			CAM_ERR(CAM_FLASH, "FLUSH_TYPE_ALL failed rc: %d", rc);
@@ -998,6 +1002,19 @@ int cam_flash_i2c_pkt_parser(struct cam_flash_ctrl *fctrl, void *arg)
 		return -EINVAL;
 	}
 
+	if ((csl_packet->header.op_code & 0xFFFFFF) !=
+		CAM_FLASH_PACKET_OPCODE_INIT &&
+		csl_packet->header.request_id <= fctrl->last_flush_req
+		&& fctrl->last_flush_req != 0) {
+		CAM_DBG(CAM_FLASH,
+			"reject request %lld, last request to flush %lld",
+			csl_packet->header.request_id, fctrl->last_flush_req);
+		return -EINVAL;
+	}
+
+	if (csl_packet->header.request_id > fctrl->last_flush_req)
+		fctrl->last_flush_req = 0;
+
 	switch (csl_packet->header.op_code & 0xFFFFFF) {
 	case CAM_FLASH_PACKET_OPCODE_INIT: {
 		/* INIT packet*/
@@ -1334,6 +1351,19 @@ int cam_flash_pmic_pkt_parser(struct cam_flash_ctrl *fctrl, void *arg)
 		CAM_ERR(CAM_FLASH, "Invalid packet params");
 		return -EINVAL;
 	}
+
+	if ((csl_packet->header.op_code & 0xFFFFFF) !=
+		CAM_FLASH_PACKET_OPCODE_INIT &&
+		csl_packet->header.request_id <= fctrl->last_flush_req
+		&& fctrl->last_flush_req != 0) {
+		CAM_DBG(CAM_FLASH,
+			"reject request %lld, last request to flush %lld",
+			csl_packet->header.request_id, fctrl->last_flush_req);
+		return -EINVAL;
+	}
+
+	if (csl_packet->header.request_id > fctrl->last_flush_req)
+		fctrl->last_flush_req = 0;
 
 	switch (csl_packet->header.op_code & 0xFFFFFF) {
 	case CAM_FLASH_PACKET_OPCODE_INIT: {
@@ -1740,6 +1770,7 @@ int cam_flash_release_dev(struct cam_flash_ctrl *fctrl)
 		fctrl->bridge_intf.device_hdl = -1;
 		fctrl->bridge_intf.link_hdl = -1;
 		fctrl->bridge_intf.session_hdl = -1;
+		fctrl->last_flush_req = 0;
 	}
 
 	return rc;
