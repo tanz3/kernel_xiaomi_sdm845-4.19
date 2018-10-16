@@ -19,8 +19,8 @@
 #define CAM_ICP_RES_TYPE_MAX        4
 
 /* packet opcode types */
-#define CAM_ICP_OPCODE_IPE_UPDATE 0
-#define CAM_ICP_OPCODE_BPS_UPDATE 1
+#define CAM_ICP_OPCODE_IPE_UPDATE   0
+#define CAM_ICP_OPCODE_BPS_UPDATE   1
 #define CAM_ICP_OPCODE_IPE_SETTINGS 2
 #define CAM_ICP_OPCODE_BPS_SETTINGS 3
 
