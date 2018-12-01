@@ -71,6 +71,9 @@ obj-$(CONFIG_TEST_IRQ_REQUESTER) += irq_requester.o
 
 obj-$(CONFIG_OKL4_USER_VIPC)    += okl4-vipc.o
 obj-$(CONFIG_OKL4_GUEST)        += okl4-panic.o
+
+obj-$(CONFIG_RTMV20)		+= rtmv20.o
+
 obj-$(CONFIG_OKL4_LINK_SHBUF)    += okl4-link-shbuf.o
 obj-$(CONFIG_WIGIG_SENSING_SPI)	+= wigig_sensing.o
 obj-$(CONFIG_QTI_MAXIM_FAN_CONTROLLER) += max31760.o
