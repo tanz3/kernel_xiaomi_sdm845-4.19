@@ -3356,7 +3356,7 @@ static int cam_icp_mgr_process_cmd_desc(struct cam_icp_hw_mgr *hw_mgr,
 	}
 
 	if (!cpu_addr) {
-		CAM_ERR(CAM_ICP, "Invalid cpu addr");
+		CAM_ERR(CAM_ICP, "invalid number of cmd buf");
 		return -EINVAL;
 	}
 
