@@ -636,7 +636,8 @@ static int cam_vfe_camif_handle_irq_bottom_half(void *handler_priv,
 		}
 		break;
 	case CAM_ISP_HW_EVENT_ERROR:
-		if (irq_status0 & camif_priv->reg_data->error_irq_mask0) {
+		if (irq_status0 & camif_priv->reg_data->error_irq_mask0 &&
+			payload->enable_reg_dump) {
 			CAM_DBG(CAM_ISP, "Received Fatal ERROR\n");
 			ret = CAM_VFE_IRQ_STATUS_VIOLATION;
 			payload->irq_reg_val[CAM_IFE_IRQ_CAMIF_REG_STATUS0] &=
@@ -645,7 +646,8 @@ static int cam_vfe_camif_handle_irq_bottom_half(void *handler_priv,
 				~(camif_priv->reg_data->error_irq_mask1);
 			cam_vfe_put_evt_payload(payload->core_info, &payload);
 		} else if (irq_status1 &
-				camif_priv->reg_data->error_irq_mask1) {
+				camif_priv->reg_data->error_irq_mask1 &&
+			payload->enable_reg_dump) {
 			CAM_DBG(CAM_ISP, "Received ERROR\n");
 			ret = CAM_ISP_HW_ERROR_OVERFLOW;
 			cam_vfe_camif_reg_dump_bh(camif_node->res_priv);
