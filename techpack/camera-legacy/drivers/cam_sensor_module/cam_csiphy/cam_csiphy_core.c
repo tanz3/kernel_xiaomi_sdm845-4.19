@@ -192,7 +192,7 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 			"offset is out of bounds: offset: %lld len: %zu",
 			cfg_dev->offset, len);
 		rc = -EINVAL;
-		goto rel_pkt_buf;
+		return rc;
 	}
 
 	remain_len -= (size_t)cfg_dev->offset;
@@ -202,7 +202,8 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	if (cam_packet_util_validate_packet(csl_packet,
 		remain_len)) {
 		CAM_ERR(CAM_CSIPHY, "Invalid packet params");
-		return -EINVAL;
+		rc = -EINVAL;
+		return rc;
 	}
 
 	cmd_desc = (struct cam_cmd_buf_desc *)
@@ -214,14 +215,15 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	if (rc < 0) {
 		CAM_ERR(CAM_CSIPHY,
 			"Failed to get cmd buf Mem address : %d", rc);
-		goto rel_pkt_buf;
+		return rc;
 	}
 
 	if ((len < sizeof(struct cam_csiphy_info)) ||
 		(cmd_desc->offset > (len - sizeof(struct cam_csiphy_info)))) {
 		CAM_ERR(CAM_CSIPHY,
 			"Not enough buffer provided for cam_cisphy_info");
-		return -EINVAL;
+		rc = -EINVAL;
+		return rc;
 	}
 
 	cmd_buf = (uint32_t *)generic_ptr;
@@ -245,15 +247,6 @@ int32_t cam_cmd_buf_parser(struct csiphy_device *csiphy_dev,
 	if (cam_cmd_csiphy_info->secure_mode == 1)
 		cam_csiphy_update_secure_info(csiphy_dev,
 			cam_cmd_csiphy_info, cfg_dev);
-
-	if (cam_mem_put_cpu_buf(cmd_desc->mem_handle))
-		CAM_WARN(CAM_CSIPHY, "Failed to put cmd buffer: 0x%x",
-			cmd_desc->mem_handle);
-
-rel_pkt_buf:
-	if (cam_mem_put_cpu_buf((int32_t) cfg_dev->packet_handle))
-		CAM_WARN(CAM_CSIPHY, "Failed to put packet Mem address: 0x%x",
-			 cfg_dev->packet_handle);
 
 	return rc;
 }
