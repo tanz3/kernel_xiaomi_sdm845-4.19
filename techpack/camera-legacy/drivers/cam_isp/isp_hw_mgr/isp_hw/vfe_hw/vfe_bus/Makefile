@@ -1,6 +1,7 @@
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_utils/
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_cdm/
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_core/
+ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_req_mgr/
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_isp/isp_hw_mgr/
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_isp/isp_hw_mgr/include
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_isp/isp_hw_mgr/hw_utils/irq_controller
