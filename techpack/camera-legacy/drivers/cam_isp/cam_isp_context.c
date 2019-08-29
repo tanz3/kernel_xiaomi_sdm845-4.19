@@ -437,6 +437,11 @@ static int __cam_isp_ctx_handle_buf_done_in_activated_state(
 
 		if (req_isp->fence_map_out[j].sync_id == -1) {
 			__cam_isp_ctx_handle_buf_done_fail_log(req_isp);
+			trace_cam_log_event("Duplicate BufDone",
+				__cam_isp_resource_handle_id_to_type(
+				done->resource_handle[i]),
+				req->request_id, ctx->ctx_id);
+
 			continue;
 		}
 
@@ -829,6 +834,8 @@ static int __cam_isp_ctx_epoch_in_applied(struct cam_isp_context *ctx_isp,
 		notify.dev_hdl = ctx->dev_hdl;
 		notify.req_id = req->request_id;
 		notify.error = CRM_KMD_ERR_BUBBLE;
+		trace_cam_log_event("Bubble", "Rcvd epoch in applied state",
+			req->request_id, ctx->ctx_id);
 		ctx->ctx_crm_intf->notify_err(&notify);
 		atomic_set(&ctx_isp->process_bubble, 1);
 		CAM_DBG(CAM_ISP, "Notify CRM about Bubble frame %lld, ctx %u",
