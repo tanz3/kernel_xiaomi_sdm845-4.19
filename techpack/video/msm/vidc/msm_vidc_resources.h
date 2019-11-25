@@ -191,6 +191,7 @@ struct msm_vidc_platform_resources {
 	bool decode_batching;
 	uint32_t batch_timeout;
 	bool dcvs;
+	bool no_sys_idle_indicator;
 	struct msm_vidc_codec_data *codec_data;
 	int codec_data_count;
 	struct msm_vidc_codec *codecs;

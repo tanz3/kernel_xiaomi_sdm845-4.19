@@ -3000,7 +3000,7 @@ static int __prepare_pc_common(struct venus_hfi_device *device)
 
 	wfi_status = BIT(0) & __read_register(device,
 				WRAPPER_CPU_STATUS, DEFAULT_SID);
-	if (!wfi_status || !idle_status) {
+	if (!device->res->no_sys_idle_indicator && (!wfi_status || !idle_status)) {
 		d_vpr_e("Skipping PC, wfi status not set\n");
 		goto skip_power_off;
 	}
