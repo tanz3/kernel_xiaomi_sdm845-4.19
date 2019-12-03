@@ -531,6 +531,7 @@ static int cam_mem_util_map_hw_va(uint32_t flags,
 	int i;
 	int rc = -1;
 	int dir = cam_mem_util_get_dma_dir(flags);
+	bool dis_delayed_unmap = false;
 
 	if (dir < 0) {
 		CAM_ERR(CAM_MEM, "fail to map DMA direction, dir=%d", dir);
@@ -540,6 +541,9 @@ static int cam_mem_util_map_hw_va(uint32_t flags,
 	CAM_DBG(CAM_MEM,
 		"map_hw_va : fd = %d,  flags = 0x%x, dir=%d, num_hdls=%d",
 		fd, flags, dir, num_hdls);
+
+	if (flags & CAM_MEM_FLAG_DISABLE_DELAYED_UNMAP)
+		dis_delayed_unmap = true;
 
 	if (flags & CAM_MEM_FLAG_PROTECTED_MODE) {
 		for (i = 0; i < num_hdls; i++) {
@@ -560,6 +564,7 @@ static int cam_mem_util_map_hw_va(uint32_t flags,
 		for (i = 0; i < num_hdls; i++) {
 			rc = cam_smmu_map_user_iova(mmu_hdls[i],
 				fd,
+				dis_delayed_unmap,
 				dir,
 				(dma_addr_t *)hw_vaddr,
 				len,
