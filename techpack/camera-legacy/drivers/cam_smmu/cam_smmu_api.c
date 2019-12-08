@@ -311,6 +311,7 @@ static void cam_smmu_page_fault_work(struct work_struct *work)
 				buf_info);
 		}
 	}
+	cam_smmu_dump_cb_info(idx);
 	kfree(payload);
 }
 
