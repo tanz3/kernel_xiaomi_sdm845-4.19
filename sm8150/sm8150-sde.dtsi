@@ -9,7 +9,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-#include <dt-bindings/clock/mdss-10nm-pll-clk.h>
+#include <dt-bindings/clock/mdss-7nm-pll-clk.h>
 
 &soc {
 	mdss_mdp: qcom,mdss_mdp@ae00000 {
