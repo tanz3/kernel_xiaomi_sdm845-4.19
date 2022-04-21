@@ -59,6 +59,17 @@ config QPNP_LINEAR_CHARGER
 	  The power supply framework is used to communicate battery and
 	  usb properties to userspace and other driver consumers like USB.
 
+config IDT_P9220
+	tristate "idtp9220 wireless Charger"
+	depends on I2C
+	help
+	  Say Y to include support for idtp9220 wireless Charger.
+	  idtp9220 is a wireless battery charger.
+	  The driver supports charger enable/disable.
+	  The driver reports the charger status via the power supply framework.
+	  The driver controls idtp9220 via I2C and
+	  supports device-tree interface.
+
 config SMB138X_CHARGER
 	tristate "SMB138X Battery Charger"
 	depends on MFD_I2C_PMIC
