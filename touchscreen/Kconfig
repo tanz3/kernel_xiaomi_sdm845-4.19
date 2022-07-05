@@ -9,13 +9,6 @@ source "techpack/xiaomi-sdm845/touchscreen/nt36xxx/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/synaptics_dsx_force/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/xiaomi/Kconfig"
 
-config SECURE_TOUCH
-	bool "Secure Touch"
-	depends on TOUCHSCREEN_ST_FTS_V521 || TOUCHSCREEN_SYNAPTICS_DSX_FORCE
-
-config I2C_BY_DMA
-	bool "I2C BY DMA"
-
 config TOUCHSCREEN_ATMEL_MXT_MI
 	tristate "Atmel mXT I2C Touchscreen"
 	depends on I2C
