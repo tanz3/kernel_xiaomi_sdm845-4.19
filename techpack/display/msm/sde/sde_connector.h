@@ -506,6 +506,8 @@ struct sde_connector {
 
 	struct mi_dimlayer_state mi_dimlayer_state;
 	u32 fod_frame_count;
+
+	bool panel_dead_skip;
 };
 
 /**

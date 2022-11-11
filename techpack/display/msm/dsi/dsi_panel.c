@@ -41,6 +41,8 @@
 extern bool idle_status;
 extern void sde_crtc_fod_ui_ready(struct dsi_display *display, int type, int value);
 
+static struct dsi_panel *g_panel;
+
 enum dsi_dsc_ratio_type {
 	DSC_8BPC_8BPP,
 	DSC_10BPC_8BPP,
@@ -339,6 +341,20 @@ static int dsi_panel_gpio_release(struct dsi_panel *panel)
 	return rc;
 }
 
+void drm_panel_reset_skip_enable(bool enable)
+{
+	if (g_panel)
+		g_panel->panel_reset_skip = enable;
+}
+
+void drm_dsi_ulps_enable(bool enable)
+{
+	if (g_panel) {
+		g_panel->ulps_feature_enabled = enable;
+		g_panel->ulps_suspend_enabled = enable;
+	}
+}
+
 int dsi_panel_trigger_esd_attack(struct dsi_panel *panel)
 {
 	struct dsi_panel_reset_config *r_config;
@@ -362,6 +378,12 @@ int dsi_panel_trigger_esd_attack(struct dsi_panel *panel)
 	}
 	DSI_ERR("failed to pull down gpio\n");
 	return -EINVAL;
+}
+
+void drm_dsi_ulps_suspend_enable(bool enable)
+{
+	if (g_panel)
+		g_panel->ulps_suspend_enabled = enable;
 }
 
 static int dsi_panel_reset(struct dsi_panel *panel)
@@ -459,6 +481,18 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
 {
 	int rc = 0;
 
+	if (g_panel->panel_reset_skip) {
+		pr_info("%s: panel reset skip\n", __func__);
+
+		if (panel->off_keep_reset) {
+			rc = dsi_panel_reset(panel);
+			if (rc) {
+				pr_err("[%s] failed to reset panel, rc=%d\n", panel->name, rc);
+			}
+		}
+		return rc;
+	}
+
 	if (panel->mi_cfg.is_tddi_flag) {
 		if (!panel->mi_cfg.tddi_doubleclick_flag || panel->mi_cfg.panel_dead_flag) {
 			rc = dsi_pwr_enable_regulator(&panel->power_info, true);
@@ -514,6 +548,16 @@ exit:
 static int dsi_panel_power_off(struct dsi_panel *panel)
 {
 	int rc = 0;
+
+	if (g_panel->panel_reset_skip) {
+			pr_info("%s: panel reset skip\n", __func__);
+			return rc;
+	}
+
+	if (!panel->off_keep_reset) {
+		if (gpio_is_valid(panel->reset_config.reset_gpio))
+			gpio_set_value(panel->reset_config.reset_gpio, 0);
+	}
 
 	if (gpio_is_valid(panel->reset_config.disp_en_gpio))
 		gpio_set_value(panel->reset_config.disp_en_gpio, 0);

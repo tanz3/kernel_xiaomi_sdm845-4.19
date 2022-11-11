@@ -233,6 +233,10 @@ int drm_panel_notifier_unregister(struct drm_panel *panel,
 int drm_panel_notifier_call_chain(struct drm_panel *panel,
 	unsigned long val, void *v);
 
+void drm_panel_reset_skip_enable(bool enable);
+void drm_dsi_ulps_enable(bool enable);
+void drm_dsi_ulps_suspend_enable(bool enable);
+
 #if defined(CONFIG_OF) && defined(CONFIG_DRM_PANEL)
 struct drm_panel *of_drm_find_panel(const struct device_node *np);
 #else
