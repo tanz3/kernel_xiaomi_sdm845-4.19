@@ -181,6 +181,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	const struct xhci_plat_priv *priv_match;
 	const struct hc_driver	*driver;
 	struct device		*sysdev, *tmpdev;
+	struct device		*dwc = NULL;
 	struct xhci_hcd		*xhci;
 	struct resource         *res;
 	struct usb_hcd		*hcd;
@@ -217,6 +218,9 @@ static int xhci_plat_probe(struct platform_device *pdev)
 
 	if (!sysdev)
 		sysdev = &pdev->dev;
+
+	if (sysdev->parent && !sysdev->of_node && sysdev->parent->of_node)
+		dwc =sysdev->parent;
 
 	/*
 	 * If sysdev dev is having parent i.e. "linux,sysdev_is_parent" is true,
@@ -341,6 +345,11 @@ static int xhci_plat_probe(struct platform_device *pdev)
 
 	if (device_property_read_u32(&pdev->dev, "usb-core-id", &xhci->core_id))
 		xhci->core_id = -EINVAL;
+
+	if (dwc)
+		hcd->usb_phy = devm_usb_get_phy_by_phandle(dwc, "usb-phy", 0);
+	else
+		hcd->usb_phy = devm_usb_get_phy_by_phandle(sysdev, "usb-phy", 0);
 
 	hcd->usb_phy = devm_usb_get_phy_by_phandle(sysdev, "usb-phy", 0);
 	if (IS_ERR(hcd->usb_phy)) {
