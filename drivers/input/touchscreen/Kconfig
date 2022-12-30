@@ -1312,4 +1312,6 @@ source "drivers/input/touchscreen/nt36xxx/Kconfig"
 
 source "drivers/input/touchscreen/synaptics_dsx_force/Kconfig"
 
+source "drivers/input/touchscreen/xiaomi/Kconfig"
+
 endif
