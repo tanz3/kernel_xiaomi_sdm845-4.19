@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2019 XiaoMi, Inc.
  */
 
 #ifndef _SDE_HW_PINGPONG_H
@@ -99,13 +100,11 @@ struct sde_hw_pingpong_ops {
 	 * Disables DSC encoder
 	 */
 	void (*disable_dsc)(struct sde_hw_pingpong *pp);
-
-	/**
-	 * Get DSC status
-	 * @Return: register value of DSC config
-	 */
-	u32 (*get_dsc_status)(struct sde_hw_pingpong *pp);
-
+       /**
+        * Get DSC status
+        * @Return: register value of DSC config
+        */
+       u32 (*get_dsc_status)(struct sde_hw_pingpong *pp);
 	/**
 	 * Program the dither hw block
 	 */

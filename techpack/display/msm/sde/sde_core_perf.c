@@ -1018,6 +1018,7 @@ void sde_core_perf_crtc_update(struct drm_crtc *crtc,
 
 		SDE_EVT32(kms->dev, stop_req, clk_rate, params_changed,
 			old->core_clk_rate, new->core_clk_rate);
+
 		ret = sde_power_clk_set_rate(&priv->phandle,
 				kms->perf.clk_name, clk_rate);
 		if (ret) {

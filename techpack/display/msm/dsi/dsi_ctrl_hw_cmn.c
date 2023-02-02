@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2019 XiaoMi, Inc.
  */
 
 #include <linux/delay.h>
@@ -1492,9 +1493,9 @@ void dsi_ctrl_hw_cmn_mask_error_intr(struct dsi_ctrl_hw *ctrl, u32 idx, bool en)
 	}
 
 	if (idx & BIT(DSI_FIFO_UNDERFLOW)) {
-		if (en)
+		if (en) {
 			reg |= (0x1b << 26);
-		else {
+		} else {
 			reg &= ~(0x1b << 26);
 			fifo_status = DSI_R32(ctrl, 0x00c);
 			DSI_W32(ctrl, 0x00c, fifo_status | underflow_clear);
@@ -1502,9 +1503,9 @@ void dsi_ctrl_hw_cmn_mask_error_intr(struct dsi_ctrl_hw *ctrl, u32 idx, bool en)
 	}
 
 	if (idx & BIT(DSI_LP_Rx_TIMEOUT)) {
-		if (en)
+		if (en) {
 			reg |= (0x7 << 23);
-		else {
+		} else {
 			reg &= ~(0x7 << 23);
 			timeout_status = DSI_R32(ctrl, 0x0c0);
 			DSI_W32(ctrl, 0x0c0, timeout_status | lp_rx_clear);
