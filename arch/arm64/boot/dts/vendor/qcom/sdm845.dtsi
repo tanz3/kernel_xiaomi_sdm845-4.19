@@ -406,6 +406,7 @@
 			>;
 		};
 		CLUSTER_COST_0: cluster-cost0 {
+			#gpio-cells = <0>;
 			busy-cost-data = <
 				 300000   3
 				 422400   4
