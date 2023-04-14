@@ -2059,6 +2059,7 @@ int32_t cam_icp_hw_mgr_cb(uint32_t irq_status, void *data)
 static void cam_icp_free_hfi_mem(void)
 {
 	int rc;
+
 	cam_smmu_dealloc_firmware(icp_hw_mgr.iommu_hdl);
 	rc = cam_mem_mgr_free_memory_region(&icp_hw_mgr.hfi_mem.sec_heap);
 	if (rc)
@@ -3556,6 +3557,13 @@ static int cam_icp_mgr_process_cmd_desc(struct cam_icp_hw_mgr *hw_mgr,
 				num_cmd_buf = (num_cmd_buf > 0) ?
 					num_cmd_buf-- : 0;
 				goto rel_cmd_buf;
+			}
+			if ((len <= cmd_desc[i].offset) ||
+				(cmd_desc[i].size < cmd_desc[i].length) ||
+				((len - cmd_desc[i].offset) <
+				cmd_desc[i].length)) {
+				CAM_ERR(CAM_ICP, "Invalid offset or length");
+				return -EINVAL;
 			}
 			cpu_addr = cpu_addr + cmd_desc[i].offset;
 		}

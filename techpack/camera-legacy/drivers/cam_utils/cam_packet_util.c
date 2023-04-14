@@ -39,6 +39,12 @@ int cam_packet_util_get_cmd_mem_addr(int handle, uint32_t **buf_addr,
 
 int cam_packet_util_validate_cmd_desc(struct cam_cmd_buf_desc *cmd_desc)
 {
+
+	if (!cmd_desc) {
+		CAM_ERR(CAM_UTIL, "Invalid cmd desc");
+		return -EINVAL;
+	}
+
 	if ((cmd_desc->length > cmd_desc->size) ||
 		(cmd_desc->mem_handle <= 0)) {
 		CAM_ERR(CAM_UTIL, "invalid cmd arg %d %d %d %d",
@@ -250,7 +256,7 @@ int cam_packet_util_process_generic_cmd_buffer(
 	struct cam_cmd_buf_desc *cmd_buf,
 	cam_packet_generic_blob_handler blob_handler_cb, void *user_data)
 {
-	int       rc;
+	int       rc = 0;
 	uintptr_t  cpu_addr = 0;
 	size_t    buf_size;
 	size_t    remain_len = 0;
