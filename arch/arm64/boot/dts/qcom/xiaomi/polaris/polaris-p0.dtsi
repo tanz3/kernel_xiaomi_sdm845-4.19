@@ -440,6 +440,7 @@
 
 &qupv3_se14_i2c {
 	status = "ok";
+	qcom,i2c-touch-active = "synaptics,dsx-i2c-force";
 	synaptics_dsi_i2c@20 {
 		compatible = "synaptics,dsx-i2c-force";
 		reg = <0x20>;
@@ -486,6 +487,7 @@
 		synaptics,guest-serialization-as-lockdown;
 		synaptics,tp-id-byte = /bits/ 8 <0>;
 		synaptics,config-array-size = <1>;
+		panel = <&dsi_jdi_fhd_nt35596s_video_display>;
 		synaptics,cfg_1 {
 			synaptics,chip-id = <0>;
 			synaptics,chip-id-name = "S3330";
@@ -530,6 +532,7 @@
 		ft5x46_i2c,fw-upgrade-id2 = <0xA6>;
 		ft5x46_i2c,fw-delay-readid-ms = <20>;
 		ft5x46_i2c,firmware-array-size = <1>;
+		panel = <&dsi_ebbg_fhd_ft8716_video_display>;
 		ft5x46_i2c,cfg_0 {
 			ft5x46_i2c,chip = <0x87>;
 			ft5x46_i2c,vendor = <0x32>;
