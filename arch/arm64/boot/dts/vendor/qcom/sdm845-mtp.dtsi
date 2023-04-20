@@ -284,12 +284,12 @@
 	qcom,battery-data = <&mtp_batterydata>;
 };
 
-&smb1355_charger_0 {
+&smb1355_charger {
 	status = "ok";
 	qcom,disable-ctm;
 };
 
-&smb1355_charger_1 {
+&smb1355_charger_0 {
 	status = "ok";
 	qcom,disable-ctm;
 };
