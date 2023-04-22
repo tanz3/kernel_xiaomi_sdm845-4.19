@@ -219,4 +219,11 @@ void sde_cp_crtc_enable(struct drm_crtc *crtc);
  * @crtc:  Pointer to drm_crtc.
  */
 void sde_cp_crtc_disable(struct drm_crtc *crtc);
+
+/**
+ * sde_cp_update_ad_vsync_count: Api to update AD vsync count
+ * @crtc: Pointer to crtc.
+ * @val: vsync count value
+ */
+void sde_cp_update_ad_vsync_count(struct drm_crtc *crtc, u32 val);
 #endif /*_SDE_COLOR_PROCESSING_H */

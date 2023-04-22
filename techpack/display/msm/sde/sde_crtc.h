@@ -253,6 +253,7 @@ struct sde_crtc_misr_info {
  * @dirty_list    : list of color processing features are dirty
  * @ad_dirty      : list containing ad properties that are dirty
  * @ad_active     : list containing ad properties that are active
+ * @ad_vsync_count : count of vblank since last reset for AD
  * @crtc_lock     : crtc lock around create, destroy and access.
  * @vblank_modeset_ctrl_lock     : lock used for controlling vblank
 				during modeset
@@ -331,6 +332,7 @@ struct sde_crtc {
 	struct list_head ad_dirty;
 	struct list_head ad_active;
 	struct list_head user_event_list;
+	u32 ad_vsync_count;
 
 	struct mutex crtc_lock;
 	struct mutex crtc_cp_lock;
