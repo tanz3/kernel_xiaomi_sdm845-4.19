@@ -18,7 +18,7 @@
 	};
 };
 
-&reserved_mem {
+&reserved_memory {
 	ramoops: ramoops@b0000000 {
 		compatible = "ramoops";
 		reg = <0 0xb0000000 0 0x00400000>;
