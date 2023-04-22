@@ -41,10 +41,10 @@
 		idt,enable = <&tlmm 62 0x00>;
 };
 
-&smb1355_charger_0 {
+&smb1355_charger {
 	qcom,enable-ctm;
 };
 
-&smb1355_charger_1 {
+&smb1355_charger_0 {
 	qcom,enable-ctm;
 };
