@@ -21,9 +21,9 @@
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 
 #include "../../sdm845-sde-display.dtsi"
+#include "polaris-audio-overlay.dtsi"
 #include "polaris-p3-pinctrl.dtsi"
 #include "polaris-p3.dtsi"
-#include "polaris-audio-overlay.dtsi"
 
 / {
 	model = "Xiaomi Technologies, Inc. Polaris P3";
