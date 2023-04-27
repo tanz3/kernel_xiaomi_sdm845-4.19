@@ -16,9 +16,9 @@
 
 #include "../../sdm845-v2.dtsi"
 #include "../../sdm845-sde-display.dtsi"
+#include "polaris-audio-overlay.dtsi"
 #include "polaris-p1-pinctrl.dtsi"
 #include "polaris-p1.dtsi"
-#include "polaris-audio-overlay.dtsi"
 
 / {
 	model = "Xiaomi Technologies, Inc. Polaris P1 v2";
