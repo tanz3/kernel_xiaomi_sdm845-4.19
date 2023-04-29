@@ -50,6 +50,7 @@ static int cam_jpeg_mgr_process_cmd(void *priv, void *data);
 static int cam_jpeg_mgr_process_irq(void *priv, void *data)
 {
 	int rc = 0;
+	int mem_hdl = 0;
 	struct cam_jpeg_process_irq_work_data_t *task_data;
 	struct cam_jpeg_hw_mgr *hw_mgr;
 	int32_t i;
@@ -145,9 +146,9 @@ static int cam_jpeg_mgr_process_irq(void *priv, void *data)
 		return rc;
 	}
 
-	rc = cam_mem_get_cpu_buf(
-		p_cfg_req->hw_cfg_args.hw_update_entries[CAM_JPEG_PARAM].handle,
-		&kaddr, &cmd_buf_len);
+	mem_hdl =
+		p_cfg_req->hw_cfg_args.hw_update_entries[CAM_JPEG_PARAM].handle;
+	rc = cam_mem_get_cpu_buf(mem_hdl, &kaddr, &cmd_buf_len);
 	if (rc) {
 		CAM_ERR(CAM_JPEG, "unable to get info for cmd buf: %x %d",
 			hw_mgr->iommu_hdl, rc);
@@ -155,6 +156,14 @@ static int cam_jpeg_mgr_process_irq(void *priv, void *data)
 	}
 
 	cmd_buf_kaddr = (uint32_t *)kaddr;
+
+	if ((p_cfg_req->hw_cfg_args.hw_update_entries[CAM_JPEG_PARAM].offset /
+			sizeof(uint32_t)) >= cmd_buf_len) {
+		CAM_ERR(CAM_JPEG, "Invalid offset: %u cmd buf len: %zu",
+			p_cfg_req->hw_cfg_args.hw_update_entries[
+			CAM_JPEG_PARAM].offset, cmd_buf_len);
+		return -EINVAL;
+	}
 
 	cmd_buf_kaddr =
 		(cmd_buf_kaddr +
@@ -1556,11 +1565,6 @@ int cam_jpeg_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl,
 	}
 
 	CAM_DBG(CAM_JPEG, "mmu handle :%d", g_jpeg_hw_mgr.iommu_hdl);
-	rc = cam_smmu_ops(g_jpeg_hw_mgr.iommu_hdl, CAM_SMMU_ATTACH);
-	if (rc) {
-		CAM_ERR(CAM_JPEG, "jpeg attach failed: %d", rc);
-		goto jpeg_attach_failed;
-	}
 
 	rc = cam_cdm_get_iommu_handle("jpegenc", &cdm_handles);
 	if (rc) {
@@ -1603,9 +1607,7 @@ int cam_jpeg_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl,
 	return rc;
 
 cdm_iommu_failed:
-	cam_smmu_ops(g_jpeg_hw_mgr.iommu_hdl, CAM_SMMU_DETACH);
 	cam_smmu_destroy_handle(g_jpeg_hw_mgr.iommu_hdl);
-jpeg_attach_failed:
 	g_jpeg_hw_mgr.iommu_hdl = 0;
 smmu_get_failed:
 	mutex_destroy(&g_jpeg_hw_mgr.hw_mgr_mutex);

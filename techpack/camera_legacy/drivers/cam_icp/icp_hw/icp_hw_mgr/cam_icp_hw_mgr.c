@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/uaccess.h>
@@ -461,12 +454,13 @@ static int32_t cam_icp_ctx_timer(void *priv, void *data)
 	return 0;
 }
 
-static void cam_icp_ctx_timer_cb(unsigned long data)
+static void cam_icp_ctx_timer_cb(struct timer_list *timer_data)
 {
 	unsigned long flags;
 	struct crm_workq_task *task;
 	struct clk_work_data *task_data;
-	struct cam_req_mgr_timer *timer = (struct cam_req_mgr_timer *)data;
+	struct cam_req_mgr_timer *timer =
+		container_of(timer_data, struct cam_req_mgr_timer, sys_timer);
 
 	spin_lock_irqsave(&icp_hw_mgr.hw_mgr_lock, flags);
 	task = cam_req_mgr_workq_get_task(icp_hw_mgr.timer_work);
@@ -485,12 +479,13 @@ static void cam_icp_ctx_timer_cb(unsigned long data)
 	spin_unlock_irqrestore(&icp_hw_mgr.hw_mgr_lock, flags);
 }
 
-static void cam_icp_device_timer_cb(unsigned long data)
+static void cam_icp_device_timer_cb(struct timer_list *timer_data)
 {
 	unsigned long flags;
 	struct crm_workq_task *task;
 	struct clk_work_data *task_data;
-	struct cam_req_mgr_timer *timer = (struct cam_req_mgr_timer *)data;
+	struct cam_req_mgr_timer *timer =
+		container_of(timer_data, struct cam_req_mgr_timer, sys_timer);
 
 	spin_lock_irqsave(&icp_hw_mgr.hw_mgr_lock, flags);
 	task = cam_req_mgr_workq_get_task(icp_hw_mgr.timer_work);
@@ -2034,6 +2029,7 @@ int32_t cam_icp_hw_mgr_cb(uint32_t irq_status, void *data)
 static void cam_icp_free_hfi_mem(void)
 {
 	int rc;
+
 	cam_smmu_dealloc_firmware(icp_hw_mgr.iommu_hdl);
 	rc = cam_mem_mgr_free_memory_region(&icp_hw_mgr.hfi_mem.sec_heap);
 	if (rc)
@@ -2179,18 +2175,21 @@ static int cam_icp_allocate_qdss_mem(void)
 static int cam_icp_get_io_mem_info(void)
 {
 	int rc;
-	size_t len;
-	dma_addr_t iova;
+	size_t len, discard_iova_len;
+	dma_addr_t iova, discard_iova_start;
 
 	rc = cam_smmu_get_io_region_info(icp_hw_mgr.iommu_hdl,
-		&iova, &len);
+		&iova, &len, &discard_iova_start, &discard_iova_len);
 	if (rc)
 		return rc;
 
 	icp_hw_mgr.hfi_mem.io_mem.iova_len = len;
 	icp_hw_mgr.hfi_mem.io_mem.iova_start = iova;
+	icp_hw_mgr.hfi_mem.io_mem.discard_iova_start = discard_iova_start;
+	icp_hw_mgr.hfi_mem.io_mem.discard_iova_len = discard_iova_len;
 
-	CAM_DBG(CAM_ICP, "iova: %llx, len: %zu", iova, len);
+	CAM_DBG(CAM_ICP, "iova: %llx, len: %zu discard iova %llx len %llx",
+		iova, len, discard_iova_start, discard_iova_len);
 
 	return rc;
 }
@@ -4750,12 +4749,6 @@ int cam_icp_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl,
 		goto icp_get_hdl_failed;
 	}
 
-	rc = cam_smmu_ops(icp_hw_mgr.iommu_hdl, CAM_SMMU_ATTACH);
-	if (rc) {
-		CAM_ERR(CAM_ICP, "icp attach failed: %d", rc);
-		goto icp_attach_failed;
-	}
-
 	rc = cam_smmu_get_handle("cam-secure", &icp_hw_mgr.iommu_sec_hdl);
 	if (rc) {
 		CAM_ERR(CAM_ICP, "get secure mmu handle failed: %d", rc);
@@ -4776,8 +4769,6 @@ icp_wq_create_failed:
 	cam_smmu_destroy_handle(icp_hw_mgr.iommu_sec_hdl);
 	icp_hw_mgr.iommu_sec_hdl = -1;
 secure_hdl_failed:
-	cam_smmu_ops(icp_hw_mgr.iommu_hdl, CAM_SMMU_DETACH);
-icp_attach_failed:
 	cam_smmu_destroy_handle(icp_hw_mgr.iommu_hdl);
 	icp_hw_mgr.iommu_hdl = -1;
 icp_get_hdl_failed:

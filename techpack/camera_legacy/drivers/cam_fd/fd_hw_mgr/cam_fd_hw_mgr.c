@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -535,7 +528,8 @@ static int cam_fd_mgr_util_prepare_io_buf_info(int32_t iommu_hdl,
 	struct cam_fd_hw_io_buffer *output_buf, uint32_t io_buf_size)
 {
 	int rc = -EINVAL;
-	uint32_t i, j, plane, num_out_buf, num_in_buf;
+	uint32_t plane, num_out_buf, num_in_buf;
+	int i, j;
 	struct cam_buf_io_cfg *io_cfg;
 	dma_addr_t io_addr[CAM_PACKET_MAX_PLANES];
 	uintptr_t cpu_addr[CAM_PACKET_MAX_PLANES];
@@ -586,11 +580,21 @@ static int cam_fd_mgr_util_prepare_io_buf_info(int32_t iommu_hdl,
 					iommu_hdl, &io_addr[plane], &size);
 				if (rc) {
 					CAM_ERR(CAM_FD,
-						"Invalid io buf %d %d %d %d",
+						"Failed to get io buf %u %u %u %d",
 						io_cfg[i].direction,
 						io_cfg[i].resource_type, plane,
 						rc);
 					return -ENOMEM;
+				}
+
+				if (io_cfg[i].offsets[plane] >= size) {
+					CAM_ERR(CAM_FD,
+						"Invalid io buf %u %u %u %d %u %zu",
+						io_cfg[i].direction,
+						io_cfg[i].resource_type, plane,
+						i, io_cfg[i].offsets[plane],
+						size);
+					return -EINVAL;
 				}
 
 				io_addr[plane] += io_cfg[i].offsets[plane];
@@ -614,7 +618,8 @@ static int cam_fd_mgr_util_prepare_io_buf_info(int32_t iommu_hdl,
 						"Invalid cpu buf %d %d %d",
 						io_cfg[i].direction,
 						io_cfg[i].resource_type, plane);
-					return -EINVAL;
+					rc = -EINVAL;
+					return rc;
 				}
 				cpu_addr[plane] += io_cfg[i].offsets[plane];
 			}
@@ -663,14 +668,14 @@ static int cam_fd_mgr_util_prepare_io_buf_info(int32_t iommu_hdl,
 		default:
 			CAM_ERR(CAM_FD, "Unsupported io direction %d",
 				io_cfg[i].direction);
-			return -EINVAL;
+			rc = -EINVAL;
+			break;
 		}
 	}
 
 	prepare->num_in_map_entries  = num_in_buf;
 	prepare->num_out_map_entries = num_out_buf;
-
-	return 0;
+	return rc;
 }
 
 static int cam_fd_mgr_util_prepare_hw_update_entries(
@@ -1736,7 +1741,6 @@ int cam_fd_hw_mgr_deinit(struct device_node *of_node)
 
 	cam_req_mgr_workq_destroy(&g_fd_hw_mgr.work);
 
-	cam_smmu_ops(g_fd_hw_mgr.device_iommu.non_secure, CAM_SMMU_DETACH);
 	cam_smmu_destroy_handle(g_fd_hw_mgr.device_iommu.non_secure);
 	g_fd_hw_mgr.device_iommu.non_secure = -1;
 
@@ -1854,12 +1858,6 @@ int cam_fd_hw_mgr_init(struct device_node *of_node,
 		goto destroy_mutex;
 	}
 
-	rc = cam_smmu_ops(g_fd_hw_mgr.device_iommu.non_secure, CAM_SMMU_ATTACH);
-	if (rc) {
-		CAM_ERR(CAM_FD, "FD attach iommu handle failed, rc=%d", rc);
-		goto destroy_smmu;
-	}
-
 	rc = cam_cdm_get_iommu_handle("fd", &g_fd_hw_mgr.cdm_iommu);
 	if (rc)
 		CAM_DBG(CAM_FD, "Failed to acquire the CDM iommu handles");
@@ -1938,8 +1936,6 @@ int cam_fd_hw_mgr_init(struct device_node *of_node,
 	return rc;
 
 detach_smmu:
-	cam_smmu_ops(g_fd_hw_mgr.device_iommu.non_secure, CAM_SMMU_DETACH);
-destroy_smmu:
 	cam_smmu_destroy_handle(g_fd_hw_mgr.device_iommu.non_secure);
 	g_fd_hw_mgr.device_iommu.non_secure = -1;
 destroy_mutex:

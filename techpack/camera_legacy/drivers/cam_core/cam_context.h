@@ -148,6 +148,7 @@ struct cam_ctx_ops {
 	struct cam_ctx_crm_ops       crm_ops;
 	cam_hw_event_cb_func         irq_ops;
 	cam_hw_pagefault_cb_func     pagefault_ops;
+	cam_ctx_info_dump_cb_func    dumpinfo_ops;
 };
 
 /**

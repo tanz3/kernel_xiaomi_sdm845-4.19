@@ -1,6 +1,10 @@
-ccflags-y += -I$(srctree)/techpack/camera_legacy/drivers/cam_core/
+# SPDX-License-Identifier: GPL-2.0-only
+
+ccflags-y += -I$(srctree)/techpack/camera_legacy/include/uapi
+ccflags-y += -I$(srctree)/techpack/camera_legacy/drivers/cam_core
 ccflags-y += -I$(srctree)/techpack/camera_legacy/drivers/cam_smmu/
 ccflags-y += -I$(srctree)/techpack/camera_legacy/drivers/cam_utils
+ccflags-y += -I$(srctree)/
 
 obj-$(CONFIG_LEGACY_CAMERA) += cam_req_mgr_core.o\
 				cam_req_mgr_dev.o \
