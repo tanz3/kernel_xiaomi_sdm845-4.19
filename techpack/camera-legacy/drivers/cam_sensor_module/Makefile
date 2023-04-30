@@ -1,3 +1,4 @@
+obj-$(CONFIG_LEGACY_CAMERA) += 3dsl_eeprom/
 obj-$(CONFIG_LEGACY_CAMERA) += cam_res_mgr/
 obj-$(CONFIG_LEGACY_CAMERA) += cam_sensor_utils/
 obj-$(CONFIG_LEGACY_CAMERA) += cam_cci/

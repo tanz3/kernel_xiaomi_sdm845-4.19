@@ -51,6 +51,9 @@
 
 #define CAM_HYP        (1 << 26)
 #define CAM_IR_LED     (1 << 27)
+
+#define CAM_SL_EEPROM  (1 << 28)
+
 #define STR_BUFFER_MAX_LENGTH  1024
 
 /*
