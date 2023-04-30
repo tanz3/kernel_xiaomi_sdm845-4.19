@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
+obj-$(CONFIG_SPECTRA_CAMERA) += 3dsl_eeprom/
 obj-$(CONFIG_SPECTRA_CAMERA) += cam_res_mgr/
 obj-$(CONFIG_SPECTRA_CAMERA) += cam_sensor_utils/
 obj-$(CONFIG_SPECTRA_CAMERA) += cam_cci/

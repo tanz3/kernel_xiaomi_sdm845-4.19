@@ -44,6 +44,8 @@
 #define CAM_PERF       (1 << 25)
 #define CAM_CUSTOM     (1 << 26)
 
+#define CAM_SL_EEPROM  (1 << 27)
+
 #define STR_BUFFER_MAX_LENGTH  1024
 
 /*

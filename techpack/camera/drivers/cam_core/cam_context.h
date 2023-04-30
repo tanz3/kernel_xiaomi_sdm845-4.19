@@ -193,6 +193,7 @@ struct cam_ctx_ops {
  * @node:                  The main node to which this context belongs
  * @sync_mutex:            mutex to sync with sync cb thread
  * @last_flush_req:        Last request to flush
+ * @ctx_released:          whether context is released from umd after acquire
  *
  */
 struct cam_context {
@@ -229,6 +230,7 @@ struct cam_context {
 	void                        *node;
 	struct mutex                 sync_mutex;
 	uint32_t                     last_flush_req;
+	bool                         ctx_released;
 };
 
 /**
