@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2012-2015 Synaptics Incorporated. All rights reserved.
  *
+ * Copyright (c) 2018-2019 The Linux Foundation. All rights reserved.
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
  *
@@ -769,8 +770,6 @@ static void rmidev_device_cleanup(struct rmidev_data *dev_data)
 				"%s: rmidev device removed\n",
 				__func__);
 	}
-
-	return;
 }
 
 static char *rmi_char_devnode(struct device *dev, umode_t *mode)
@@ -1033,8 +1032,6 @@ static void rmidev_remove_device(struct synaptics_rmi4_data *rmi4_data)
 
 exit:
 	complete(&rmidev_remove_complete_force);
-
-	return;
 }
 
 static struct synaptics_rmi4_exp_fn rmidev_module = {
@@ -1062,8 +1059,6 @@ static void __exit rmidev_module_exit(void)
 	synaptics_rmi4_new_function_force(&rmidev_module, false);
 
 	wait_for_completion(&rmidev_remove_complete_force);
-
-	return;
 }
 
 module_init(rmidev_module_init);

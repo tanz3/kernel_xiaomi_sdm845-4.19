@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2012-2015 Synaptics Incorporated. All rights reserved.
  *
+ * Copyright (c) 2018-2019 The Linux Foundation. All rights reserved.
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
  *
@@ -256,7 +257,6 @@
 #define FULL_RAW_CAP_MIN_MAX_DATA_SIZE 4
 #define TRX_OPEN_SHORT_DATA_SIZE 7
 
-
 #define F54_POLLING_GET_REPORT
 static char *factory_string[] = {
 	"tddi_short_limit_b",
@@ -286,42 +286,6 @@ static char *factory_string[] = {
 	NULL,
 	};
 
-#if 0
-/* test limit config */
-#define TDDI_SHORT_LIMIT_B			150
-#define TDDI_NOISE_LIMIT			28
-
-/* #define ENABLE_EXTEND_EE_SHORT */
-#define TDDI_EXTEND_EE_SHORT_RESET_DUR  60
-#define TDDI_EXTEND_EE_SHORT_INT_DUR  150
-#define TDDI_EXTEND_EE_SHORT_TX_ON_COUNT  146
-#define TDDI_EXTEND_EE_SHORT_RX_ON_COUNT  146
-#define TDDI_EXTEND_EE_SHORT_TEST_LIMIT_PART1  100
-#define TDDI_EXTEND_EE_SHORT_TEST_LIMIT_PART2  96
-
-#define TDDI_OPEN_TEST_INT_DUR_ONE		145
-#define TDDI_OPEN_TEST_INT_DUR_TWO		15
-#define TDDI_OPEN_TEST_LIMIT_PHASE2_LOWER	50
-
-/* #define ENABLE_AMP_OPEN_B7 */
-#define TDDI_B7_OPEN_TEST_INT_DUR_ONE		23
-#define TDDI_B7_OPEN_TEST_INT_DUR_TWO		27
-#define TDDI_B7_OPEN_TEST_LIMIT_PHASE2_LOWER	0
-#define TDDI_B7_OPEN_TEST_LIMIT_PHASE2_UPPER   115
-
-#define BUTTON_COUNT 3
-#define ABS_0D_OPEN_FACTOR 8
-#define ABS_0D_OPEN_TEST_LIMIT 30
-
-#define ELEC_OPEN_TEST_TX_ON_COUNT 2
-#define ELEC_OPEN_TEST_RX_ON_COUNT 2
-#define ELEC_OPEN_INT_DUR_ONE 4
-#define ELEC_OPEN_INT_DUR_TWO 15
-#define ELEC_OPEN_TEST_LIMIT_ONE 500
-#define ELEC_OPEN_TEST_LIMIT_TWO 80
-/* test limit config - */
-#endif
-
 #define TEST_INVALID	0
 #define TEST_FAILED	1
 #define TEST_OK		2
@@ -334,47 +298,39 @@ static char *factory_string[] = {
 
 #define CHIP_ID_OFFSET	11
 
-#define concat(a, b) a##b
-
 #define attrify(propname) (&dev_attr_##propname.attr)
 
 #define show_prototype(propname)\
-static ssize_t concat(test_sysfs, _##propname##_show)(\
+static ssize_t propname##_show(\
 		struct device *dev,\
 		struct device_attribute *attr,\
 		char *buf);\
 \
 static struct device_attribute dev_attr_##propname =\
-		__ATTR(propname, S_IRUGO,\
-		concat(test_sysfs, _##propname##_show),\
-		synaptics_rmi4_store_error);
+		__ATTR_RO(propname)
 
 #define store_prototype(propname)\
-static ssize_t concat(test_sysfs, _##propname##_store)(\
+static ssize_t propname##_store(\
 		struct device *dev,\
 		struct device_attribute *attr,\
 		const char *buf, size_t count);\
 \
 static struct device_attribute dev_attr_##propname =\
-		__ATTR(propname, (S_IWUSR | S_IWGRP),\
-		synaptics_rmi4_show_error,\
-		concat(test_sysfs, _##propname##_store));
+		__ATTR_WO(propname)
 
 #define show_store_prototype(propname)\
-static ssize_t concat(test_sysfs, _##propname##_show)(\
+static ssize_t propname##_show(\
 		struct device *dev,\
 		struct device_attribute *attr,\
 		char *buf);\
 \
-static ssize_t concat(test_sysfs, _##propname##_store)(\
+static ssize_t propname##_store(\
 		struct device *dev,\
 		struct device_attribute *attr,\
 		const char *buf, size_t count);\
 \
 static struct device_attribute dev_attr_##propname =\
-		__ATTR(propname, (S_IRUGO | S_IWUSR | S_IWGRP),\
-		concat(test_sysfs, _##propname##_show),\
-		concat(test_sysfs, _##propname##_store));
+		__ATTR_RW(propname)
 
 #define disable_cbc(ctrl_num)\
 do {\
@@ -1559,32 +1515,35 @@ struct synaptics_rmi4_f55_handle {
 	struct f55_query_33 query_33;
 };
 
-show_prototype(num_of_mapped_tx)
-show_prototype(num_of_mapped_rx)
-show_prototype(tx_mapping)
-show_prototype(rx_mapping)
-show_prototype(force_tx_mapping)
-show_prototype(force_rx_mapping)
-show_prototype(report_size)
-show_prototype(status)
-store_prototype(do_preparation)
-store_prototype(force_cal)
-store_prototype(get_report)
-store_prototype(resume_touch)
-store_prototype(do_afe_calibration)
-show_store_prototype(report_type)
-show_store_prototype(fifoindex)
-show_store_prototype(no_auto_cal)
-show_store_prototype(read_report)
+show_prototype(num_of_mapped_tx);
+show_prototype(num_of_mapped_rx);
+show_prototype(tx_mapping);
+show_prototype(rx_mapping);
+show_prototype(force_tx_mapping);
+show_prototype(force_rx_mapping);
+show_prototype(report_size);
+show_prototype(status);
+
+store_prototype(do_preparation);
+store_prototype(force_cal);
+store_prototype(get_report);
+store_prototype(resume_touch);
+store_prototype(do_afe_calibration);
+
+show_store_prototype(report_type);
+show_store_prototype(fifoindex);
+show_store_prototype(no_auto_cal);
+show_store_prototype(read_report);
+
 /* td43xx start */
-show_store_prototype(td43xx_full_raw)
-show_store_prototype(td43xx_noise)
-show_store_prototype(tddi_extend_ee_short)
-show_store_prototype(td43xx_ee_short)
-show_store_prototype(td4722_b7_amp_open)
-show_store_prototype(td43xx_amp_open)
-show_store_prototype(tddi_amp_electrode_open)
-show_store_prototype(abs_0d_open_w_autoservo)
+show_store_prototype(td43xx_full_raw);
+show_store_prototype(td43xx_noise);
+show_store_prototype(tddi_extend_ee_short);
+show_store_prototype(td43xx_ee_short);
+show_store_prototype(td4722_b7_amp_open);
+show_store_prototype(td43xx_amp_open);
+show_store_prototype(tddi_amp_electrode_open);
+show_store_prototype(abs_0d_open_w_autoservo);
 /* td43xx end */
 
 static struct attribute *attrs[] = {
@@ -1622,7 +1581,7 @@ static struct attribute_group attr_group = {
 	.attrs = attrs,
 };
 /*
-static ssize_t test_sysfs_data_read(struct file *data_file,
+static ssize_t data_read(struct file *data_file,
 		struct kobject *kobj, struct bin_attribute *attributes,
 		char *buf, loff_t pos, size_t count);
 
@@ -1632,7 +1591,7 @@ static struct bin_attribute test_report_data = {
 		.mode = S_IRUGO,
 	},
 	.size = 0,
-	.read = test_sysfs_data_read,
+	.read = data_read,
 };
 */
 static struct synaptics_rmi4_f54_handle *f54;
@@ -1684,7 +1643,6 @@ static bool test_report_type_valid(enum f54_report_types report_type)
 	case F54_TD43XX_EE_SHORT:
 	/* td43xx end */
 		return true;
-		break;
 	case F54_ABS_DOZE_NO_CBC_INCELL:
 		if (f54->query_65.has_ctrl225) {
 			return true;
@@ -1692,7 +1650,6 @@ static bool test_report_type_valid(enum f54_report_types report_type)
 		else {
 			return false;
 		}
-		break;
 	default:
 		f54->report_type = INVALID_REPORT_TYPE;
 		f54->report_size = 0;
@@ -1792,8 +1749,6 @@ static void test_set_report_size(void)
 	default:
 		f54->report_size = 0;
 	}
-
-	return;
 }
 
 static int test_set_interrupt(bool set)
@@ -2311,8 +2266,6 @@ static void test_timeout_work(struct work_struct *work)
 
 exit:
 	mutex_unlock(&f54->status_mutex);
-
-	return;
 }
 
 static enum hrtimer_restart test_get_report_timeout(struct hrtimer *timer)
@@ -2423,19 +2376,19 @@ static void test_resume_touch_work(struct work_struct *work)
 
 }
 
-static ssize_t test_sysfs_num_of_mapped_tx_show(struct device *dev,
+static ssize_t num_of_mapped_tx_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%u\n", f54->tx_assigned);
 }
 
-static ssize_t test_sysfs_num_of_mapped_rx_show(struct device *dev,
+static ssize_t num_of_mapped_rx_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%u\n", f54->rx_assigned);
 }
 
-static ssize_t test_sysfs_tx_mapping_show(struct device *dev,
+static ssize_t tx_mapping_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int cnt;
@@ -2465,7 +2418,7 @@ static ssize_t test_sysfs_tx_mapping_show(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_rx_mapping_show(struct device *dev,
+static ssize_t rx_mapping_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int cnt;
@@ -2495,7 +2448,7 @@ static ssize_t test_sysfs_rx_mapping_show(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_force_tx_mapping_show(struct device *dev,
+static ssize_t force_tx_mapping_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int cnt;
@@ -2525,7 +2478,7 @@ static ssize_t test_sysfs_force_tx_mapping_show(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_force_rx_mapping_show(struct device *dev,
+static ssize_t force_rx_mapping_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int cnt;
@@ -2555,13 +2508,13 @@ static ssize_t test_sysfs_force_rx_mapping_show(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_report_size_show(struct device *dev,
+static ssize_t report_size_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%u\n", f54->report_size);
 }
 
-static ssize_t test_sysfs_status_show(struct device *dev,
+static ssize_t status_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int retval;
@@ -2575,7 +2528,7 @@ static ssize_t test_sysfs_status_show(struct device *dev,
 	return retval;
 }
 
-static ssize_t test_sysfs_do_preparation_store(struct device *dev,
+static ssize_t do_preparation_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2611,7 +2564,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_force_cal_store(struct device *dev,
+static ssize_t force_cal_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2649,7 +2602,7 @@ exit:
 
 /* tddi f54 test reporting + */
 #ifdef F54_POLLING_GET_REPORT
-static ssize_t test_sysfs_get_report_polling(void)
+static ssize_t get_report_polling(void)
 {
 	int retval = 0;
 	unsigned char report_index[2];
@@ -2721,8 +2674,7 @@ static ssize_t test_sysfs_get_report_polling(void)
 #endif
 /* tddi f54 test reporting - */
 
-
-static ssize_t test_sysfs_get_report_store(struct device *dev,
+static ssize_t get_report_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2769,7 +2721,7 @@ static ssize_t test_sysfs_get_report_store(struct device *dev,
 /* tddi f54 test reporting + */
 #ifdef F54_POLLING_GET_REPORT
 
-	retval = test_sysfs_get_report_polling();
+	retval = get_report_polling();
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
 				"%s: Failed to get report image\n",
@@ -2796,7 +2748,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_resume_touch_store(struct device *dev,
+static ssize_t resume_touch_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2820,7 +2772,7 @@ static ssize_t test_sysfs_resume_touch_store(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_do_afe_calibration_store(struct device *dev,
+static ssize_t do_afe_calibration_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2849,13 +2801,13 @@ static ssize_t test_sysfs_do_afe_calibration_store(struct device *dev,
 		return count;
 }
 
-static ssize_t test_sysfs_report_type_show(struct device *dev,
+static ssize_t report_type_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%u\n", f54->report_type);
 }
 
-static ssize_t test_sysfs_report_type_store(struct device *dev,
+static ssize_t report_type_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2926,7 +2878,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_fifoindex_show(struct device *dev,
+static ssize_t fifoindex_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int retval;
@@ -2949,7 +2901,7 @@ static ssize_t test_sysfs_fifoindex_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%u\n", f54->fifoindex);
 }
 
-static ssize_t test_sysfs_fifoindex_store(struct device *dev,
+static ssize_t fifoindex_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -2979,13 +2931,13 @@ static ssize_t test_sysfs_fifoindex_store(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_no_auto_cal_show(struct device *dev,
+static ssize_t no_auto_cal_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%u\n", f54->no_auto_cal);
 }
 
-static ssize_t test_sysfs_no_auto_cal_store(struct device *dev,
+static ssize_t no_auto_cal_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -3032,7 +2984,7 @@ static ssize_t test_sysfs_no_auto_cal_store(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_read_report_show(struct device *dev,
+static ssize_t read_report_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	unsigned int ii;
@@ -3374,7 +3326,7 @@ static ssize_t test_sysfs_read_report_show(struct device *dev,
 	return count;
 }
 
-static ssize_t test_sysfs_read_report_store(struct device *dev,
+static ssize_t read_report_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -3392,23 +3344,23 @@ static ssize_t test_sysfs_read_report_store(struct device *dev,
 	pr_err("%s: f54->tx_assigned = %d\n", __func__, f54->tx_assigned);
 	pr_err("%s: f54->rx_assigned = %d\n", __func__, f54->rx_assigned);
 
-	retval = test_sysfs_report_type_store(dev, attr, buf, count);
+	retval = report_type_store(dev, attr, buf, count);
 	if (retval < 0)
 		goto exit;
 
-	pr_err("%s: done test_sysfs_report_type_store\n", __func__);
+	pr_err("%s: done report_type_store\n", __func__);
 
-	retval = test_sysfs_do_preparation_store(dev, attr, cmd, 1);
+	retval = do_preparation_store(dev, attr, cmd, 1);
 	if (retval < 0)
 		goto exit;
 
-	pr_err("%s: done test_sysfs_do_preparation_store\n", __func__);
+	pr_err("%s: done do_preparation_store\n", __func__);
 
-	retval = test_sysfs_get_report_store(dev, attr, cmd, 1);
+	retval = get_report_store(dev, attr, cmd, 1);
 	if (retval < 0)
 		goto exit;
 
-	pr_err("%s: done test_sysfs_get_report_store\n", __func__);
+	pr_err("%s: done get_report_store\n", __func__);
 
 	retval = test_wait_for_command_completion();
 	if (retval < 0)
@@ -3438,7 +3390,7 @@ static ssize_t test_sysfs_read_report_store(struct device *dev,
 	pr_err("%s: got report\n", __func__);
 
 	if (f54->rmi4_data->dump_flags) {
-		retval = test_sysfs_resume_touch_store(dev, attr, cmd, 1);
+		retval = resume_touch_store(dev, attr, cmd, 1);
 		if (retval < 0)
 			goto exit;
 	} else
@@ -3454,7 +3406,7 @@ exit:
 }
 
 /* td43xx start */
-static ssize_t test_sysfs_read_report_td43xx(struct device *dev,
+static ssize_t read_report_td43xx(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count,
 		bool do_preparation, bool do_reset)
 {
@@ -3464,16 +3416,16 @@ static ssize_t test_sysfs_read_report_td43xx(struct device *dev,
 	const char cmd[] = {'1', 0};
 	struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
 
-	retval = test_sysfs_report_type_store(dev, attr, buf, count);
+	retval = report_type_store(dev, attr, buf, count);
 	if (retval < 0)
 		goto exit;
 
 	if (do_preparation) {
-		retval = test_sysfs_do_preparation_store(dev, attr, cmd, 1);
+		retval = do_preparation_store(dev, attr, cmd, 1);
 		if (retval < 0)
 			goto exit;
 	}
-	retval = test_sysfs_get_report_store(dev, attr, cmd, 1);
+	retval = get_report_store(dev, attr, cmd, 1);
 	if (retval < 0)
 		goto exit;
 
@@ -3673,7 +3625,7 @@ exit:
 	kfree(p_left_column_buf);
 	return retval;
 }
-static ssize_t test_sysfs_tddi_extend_ee_short_store(struct device *dev,
+static ssize_t tddi_extend_ee_short_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval;
@@ -3803,7 +3755,7 @@ static ssize_t test_sysfs_tddi_extend_ee_short_store(struct device *dev,
 
 	/* step 4 */
 	/* get report image 95 */
-	retval = test_sysfs_read_report_td43xx(dev, attr, "95", count,
+	retval = read_report_td43xx(dev, attr, "95", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -3936,7 +3888,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_tddi_extend_ee_short_show(struct device *dev,
+static ssize_t tddi_extend_ee_short_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int i, j;
@@ -3970,7 +3922,7 @@ static ssize_t test_sysfs_tddi_extend_ee_short_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%s\n", (fail_count == 0) ? "PASS" : "FAIL");
 }
 
-static ssize_t test_sysfs_td43xx_ee_short_store(struct device *dev,
+static ssize_t td43xx_ee_short_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -4021,7 +3973,7 @@ static ssize_t test_sysfs_td43xx_ee_short_store(struct device *dev,
 		goto exit;
 	}
 
-	retval = test_sysfs_read_report_td43xx(dev, attr, "95", count,
+	retval = read_report_td43xx(dev, attr, "95", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -4067,7 +4019,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_td43xx_ee_short_show(struct device *dev,
+static ssize_t td43xx_ee_short_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int i, j;
@@ -4100,7 +4052,7 @@ static ssize_t test_sysfs_td43xx_ee_short_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%s\n", (result == 1) ? "PASS" : "FAIL");
 }
 
-static ssize_t test_sysfs_td43xx_noise_store(struct device *dev,
+static ssize_t td43xx_noise_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -4165,7 +4117,7 @@ static ssize_t test_sysfs_td43xx_noise_store(struct device *dev,
 	}
 
 	for (repeat = 0; repeat < times; repeat++) {
-		retval = test_sysfs_read_report_td43xx(dev, attr, "94", count,
+		retval = read_report_td43xx(dev, attr, "94", count,
 					false, false);
 		if (retval < 0) {
 			dev_err(rmi4_data->pdev->dev.parent,
@@ -4215,7 +4167,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_td43xx_noise_show(struct device *dev,
+static ssize_t td43xx_noise_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int i, j;
@@ -4247,7 +4199,7 @@ static ssize_t test_sysfs_td43xx_noise_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%s\n", (result == 1) ? "PASS" : "FAIL");
 }
 
-static ssize_t test_sysfs_td43xx_full_raw_store(struct device *dev,
+static ssize_t td43xx_full_raw_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -4275,7 +4227,7 @@ static ssize_t test_sysfs_td43xx_full_raw_store(struct device *dev,
 		return -ENOMEM;
 	}
 
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -4292,7 +4244,7 @@ static ssize_t test_sysfs_td43xx_full_raw_store(struct device *dev,
 	return retval;
 }
 
-static ssize_t test_sysfs_td43xx_full_raw_show(struct device *dev,
+static ssize_t td43xx_full_raw_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	unsigned int ii;
@@ -4515,7 +4467,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_td4722_b7_amp_open_store(struct device *dev,
+static ssize_t td4722_b7_amp_open_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -4650,7 +4602,7 @@ static ssize_t test_sysfs_td4722_b7_amp_open_store(struct device *dev,
 		goto exit;
 	}
 	// grep the report image 92
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -4708,7 +4660,7 @@ static ssize_t test_sysfs_td4722_b7_amp_open_store(struct device *dev,
 		goto exit;
 	}
 	// grep the report image 92
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -4792,7 +4744,7 @@ exit:
 	return count;
 }
 
-static ssize_t test_sysfs_td4722_b7_amp_open_show(struct device *dev,
+static ssize_t td4722_b7_amp_open_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int i = 0, j = 0;
@@ -4985,7 +4937,7 @@ exit:
 	return retval;
 }
 
-static ssize_t test_sysfs_td43xx_amp_open_store(struct device *dev,
+static ssize_t td43xx_amp_open_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -5107,7 +5059,7 @@ static ssize_t test_sysfs_td43xx_amp_open_store(struct device *dev,
 		goto exit;
 	}
 
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -5155,7 +5107,7 @@ static ssize_t test_sysfs_td43xx_amp_open_store(struct device *dev,
 		goto exit;
 	}
 
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -5223,7 +5175,7 @@ exit:
 	return count;
 }
 
-static ssize_t test_sysfs_td43xx_amp_open_show(struct device *dev,
+static ssize_t td43xx_amp_open_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int i, j;
@@ -5256,7 +5208,7 @@ static ssize_t test_sysfs_td43xx_amp_open_show(struct device *dev,
 }
 
 
-static ssize_t test_sysfs_tddi_amp_electrode_open_store(struct device *dev,
+static ssize_t tddi_amp_electrode_open_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -5465,7 +5417,7 @@ static ssize_t test_sysfs_tddi_amp_electrode_open_store(struct device *dev,
 	/* step 5 */
 	/* Capture raw capacitance (rt92) image 1 */
 	/* Run Report Type 92 */
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -5527,7 +5479,7 @@ static ssize_t test_sysfs_tddi_amp_electrode_open_store(struct device *dev,
 	/* step 7 */
 	/* Capture raw capacitance (rt92) image 2 */
 	/* Run Report Type 92 */
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -5677,7 +5629,7 @@ exit:
 
 	return count;
 }
-static ssize_t test_sysfs_tddi_amp_electrode_open_show(struct device *dev,
+static ssize_t tddi_amp_electrode_open_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	int i, j;
@@ -5706,7 +5658,7 @@ static ssize_t test_sysfs_tddi_amp_electrode_open_show(struct device *dev,
 }
 
 
-static ssize_t test_sysfs_abs_0d_open_w_autoservo_store(struct device *dev,
+static ssize_t abs_0d_open_w_autoservo_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
 	int retval = 0;
@@ -5790,7 +5742,7 @@ static ssize_t test_sysfs_abs_0d_open_w_autoservo_store(struct device *dev,
 
 	/* step 1 */
 	/* get first rt92 image */
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -5859,7 +5811,7 @@ static ssize_t test_sysfs_abs_0d_open_w_autoservo_store(struct device *dev,
 
 	/* step 4 */
 	/* get second rt92 image */
-	retval = test_sysfs_read_report_td43xx(dev, attr, "92", count,
+	retval = read_report_td43xx(dev, attr, "92", count,
 				false, false);
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
@@ -5932,7 +5884,7 @@ exit:
 }
 
 
-static ssize_t test_sysfs_abs_0d_open_w_autoservo_show(struct device *dev,
+static ssize_t abs_0d_open_w_autoservo_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	bool result = 0;
@@ -6058,16 +6010,12 @@ exit:
 		f54->report_size = 0;
 
 	f54->status = retval;
-
-	return;
 }
 
 static void test_remove_sysfs(void)
 {
 	sysfs_remove_group(f54->sysfs_dir, &attr_group);
 	kobject_put(f54->sysfs_dir);
-
-	return;
 }
 
 static int test_set_sysfs(void)
@@ -6119,8 +6067,6 @@ static void test_free_control_mem(void)
 	kfree(control.reg_188);
 	kfree(control.reg_223);
 	kfree(control.reg_225);
-
-	return;
 }
 
 static void test_set_data(void)
@@ -6238,8 +6184,6 @@ static void test_set_data(void)
 		f54->data_31.address = reg_addr;
 		reg_addr++;
 	}
-
-	return;
 }
 
 static int test_set_controls(void)
@@ -7504,8 +7448,6 @@ static void test_f54_set_regs(struct synaptics_rmi4_data *rmi4_data,
 			ii++) {
 		f54->intr_mask |= 1 << ii;
 	}
-
-	return;
 }
 
 static int test_f55_set_controls(void)
@@ -7847,25 +7789,31 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 	unsigned char ii;
 	unsigned char rx_electrodes;
 	unsigned char tx_electrodes;
-	struct f55_control_43 ctrl_43;
+	struct f55_control_43 *ctrl_43 = NULL;
+
+	ctrl_43 = kzalloc(sizeof(*ctrl_43), GFP_KERNEL);
+	if (!ctrl_43) {
+		retval = -ENOMEM;
+		goto exit;
+	}
 
 	retval = test_f55_set_queries();
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
 				"%s: Failed to read f55 query registers\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	if (!f55->query.has_sensor_assignment)
-		return;
+		goto exit;
 
 	retval = test_f55_set_controls();
 	if (retval < 0) {
 		dev_err(rmi4_data->pdev->dev.parent,
 				"%s: Failed to set up f55 control registers\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	tx_electrodes = f55->query.num_of_tx_electrodes;
@@ -7882,7 +7830,7 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 		dev_err(rmi4_data->pdev->dev.parent,
 				"%s: Failed to read f55 tx assignment\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	retval = synaptics_rmi4_reg_read(rmi4_data,
@@ -7893,7 +7841,7 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 		dev_err(rmi4_data->pdev->dev.parent,
 				"%s: Failed to read f55 rx assignment\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	f54->tx_assigned = 0;
@@ -7916,21 +7864,21 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 	if (f55->extended_amp) {
 		retval = synaptics_rmi4_reg_read(rmi4_data,
 				f55->control_base_addr + f55->afe_mux_offset,
-				ctrl_43.data,
-				sizeof(ctrl_43.data));
+				ctrl_43->data,
+				sizeof(ctrl_43->data));
 		if (retval < 0) {
 			dev_err(rmi4_data->pdev->dev.parent,
 					"%s: Failed to read f55 AFE mux sizes\n",
 					__func__);
-			return;
+			goto exit;
 		}
 
-		f54->tx_assigned = ctrl_43.afe_l_mux_size +
-				ctrl_43.afe_r_mux_size;
+		f54->tx_assigned = ctrl_43->afe_l_mux_size +
+				ctrl_43->afe_r_mux_size;
 
-		f54->swap_sensor_side = ctrl_43.swap_sensor_side;
-		f54->left_mux_size = ctrl_43.afe_l_mux_size;
-		f54->right_mux_size = ctrl_43.afe_r_mux_size;
+		f54->swap_sensor_side = ctrl_43->swap_sensor_side;
+		f54->left_mux_size = ctrl_43->afe_l_mux_size;
+		f54->right_mux_size = ctrl_43->afe_r_mux_size;
 
 		if (f55->query_33.has_extended_amp_btn)
 			f54->tx_assigned++;
@@ -7949,7 +7897,7 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 			dev_err(rmi4_data->pdev->dev.parent,
 					"%s: Failed to read f55 force tx assignment\n",
 					__func__);
-			return;
+			goto exit;
 		}
 
 		retval = synaptics_rmi4_reg_read(rmi4_data,
@@ -7960,7 +7908,7 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 			dev_err(rmi4_data->pdev->dev.parent,
 					"%s: Failed to read f55 force rx assignment\n",
 					__func__);
-			return;
+			goto exit;
 		}
 
 		for (ii = 0; ii < tx_electrodes; ii++) {
@@ -7974,6 +7922,8 @@ static void test_f55_init(struct synaptics_rmi4_data *rmi4_data)
 		}
 	}
 
+exit:
+	kfree(ctrl_43);
 	return;
 }
 
@@ -7993,8 +7943,6 @@ static void test_f55_set_regs(struct synaptics_rmi4_data *rmi4_data,
 	f55->control_base_addr = fd->ctrl_base_addr | (page << 8);
 	f55->data_base_addr = fd->data_base_addr | (page << 8);
 	f55->command_base_addr = fd->cmd_base_addr | (page << 8);
-
-	return;
 }
 
 static int test_scan_pdt(void)
@@ -8005,7 +7953,6 @@ static int test_scan_pdt(void)
 	unsigned short addr;
 	bool f54found = false;
 	bool f55found = false;
-	struct synaptics_rmi4_fn_desc rmi_fd;
 	struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
 
 	for (page = 0; page < PAGES_TO_SERVICE; page++) {
@@ -8014,25 +7961,26 @@ static int test_scan_pdt(void)
 
 			retval = synaptics_rmi4_reg_read(rmi4_data,
 					addr,
-					(unsigned char *)&rmi_fd,
-					sizeof(rmi_fd));
+					(unsigned char *)&rmi4_data->rmi_fd,
+					sizeof(rmi4_data->rmi_fd));
 			if (retval < 0)
 				return retval;
 
 			addr &= ~(MASK_8BIT << 8);
 
-			if (!rmi_fd.fn_number)
+			if (!rmi4_data->rmi_fd.fn_number)
 				break;
 
-			switch (rmi_fd.fn_number) {
+			switch (rmi4_data->rmi_fd.fn_number) {
 			case SYNAPTICS_RMI4_F54:
 				test_f54_set_regs(rmi4_data,
-						&rmi_fd, intr_count, page);
+						&rmi4_data->rmi_fd, intr_count,
+						page);
 				f54found = true;
 				break;
 			case SYNAPTICS_RMI4_F55:
 				test_f55_set_regs(rmi4_data,
-						&rmi_fd, page);
+						&rmi4_data->rmi_fd, page);
 				f55found = true;
 				break;
 			default:
@@ -8042,7 +7990,7 @@ static int test_scan_pdt(void)
 			if (f54found && f55found)
 				goto pdt_done;
 
-			intr_count += rmi_fd.intr_src_count;
+			intr_count += rmi4_data->rmi_fd.intr_src_count;
 		}
 	}
 
@@ -8082,11 +8030,11 @@ static ssize_t short_test_333x(void)
 		goto out;
 	}
 
-	retval = test_sysfs_read_report_store(NULL, NULL, TEST_TYPE_25_333X, strlen(TEST_TYPE_25_333X));
+	retval = read_report_store(NULL, NULL, TEST_TYPE_25_333X, strlen(TEST_TYPE_25_333X));
 	if (retval < 0)
 		goto out;
 
-	retval = test_sysfs_read_report_show(NULL, NULL, f54->data);
+	retval = read_report_show(NULL, NULL, f54->data);
 	if (retval < 0)
 		goto out;
 
@@ -8097,11 +8045,11 @@ static ssize_t short_test_333x(void)
 
 	msleep(1000);
 
-	retval = test_sysfs_read_report_store(NULL, NULL, TEST_TYPE_26_333X, strlen(TEST_TYPE_26_333X));
+	retval = read_report_store(NULL, NULL, TEST_TYPE_26_333X, strlen(TEST_TYPE_26_333X));
 	if (retval < 0)
 		goto out;
 
-	retval = test_sysfs_read_report_show(NULL, NULL, f54->data);
+	retval = read_report_show(NULL, NULL, f54->data);
 	if (retval < 0)
 		goto out;
 
@@ -8124,13 +8072,13 @@ static ssize_t short_test_4x22(void)
 	int retval;
 	char buf[4];
 
-	retval = test_sysfs_td43xx_ee_short_store(NULL, NULL, "1", 1);
+	retval = td43xx_ee_short_store(NULL, NULL, "1", 1);
 	if (retval < 0)
 		goto out;
 
 	msleep(100);
 
-	retval = test_sysfs_td43xx_ee_short_show(NULL, NULL, buf);
+	retval = td43xx_ee_short_show(NULL, NULL, buf);
 	if (retval < 0)
 		goto out;
 
@@ -8151,13 +8099,13 @@ static ssize_t short_test_tddi_extend(void)
 	int retval;
 	char buf[4];
 
-	retval = test_sysfs_tddi_extend_ee_short_store(NULL, NULL, "1", 1);
+	retval = tddi_extend_ee_short_store(NULL, NULL, "1", 1);
 	if (retval < 0)
 		goto out;
 
 	msleep(100);
 
-	retval = test_sysfs_tddi_extend_ee_short_show(NULL, NULL, buf);
+	retval = tddi_extend_ee_short_show(NULL, NULL, buf);
 	if (retval < 0)
 		goto out;
 
@@ -8180,11 +8128,11 @@ static ssize_t open_test_333x(void)
 	int val, tx, rx, num = 0;
 	char *pos;
 
-	retval = test_sysfs_read_report_store(NULL, NULL, TEST_TYPE_03, strlen(TEST_TYPE_03));
+	retval = read_report_store(NULL, NULL, TEST_TYPE_03, strlen(TEST_TYPE_03));
 	if (retval < 0)
 		goto out;
 
-	retval = test_sysfs_read_report_show(NULL, NULL, f54->data);
+	retval = read_report_show(NULL, NULL, f54->data);
 	if (retval < 0)
 		goto out;
 
@@ -8226,13 +8174,13 @@ static ssize_t open_test_4x22(void)
 	int retval;
 	char buf[4];
 
-	retval = test_sysfs_td43xx_amp_open_store(NULL, NULL, "1", 1);
+	retval = td43xx_amp_open_store(NULL, NULL, "1", 1);
 	if (retval < 0)
 		goto out;
 
 	msleep(100);
 
-	retval = test_sysfs_td43xx_amp_open_show(NULL, NULL, buf);
+	retval = td43xx_amp_open_show(NULL, NULL, buf);
 	if (retval < 0)
 		goto out;
 
@@ -8253,13 +8201,13 @@ static ssize_t open_test_b7(void)
 	int retval;
 	char buf[4];
 
-	retval = test_sysfs_td4722_b7_amp_open_store(NULL, NULL, "1", 1);
+	retval = td4722_b7_amp_open_store(NULL, NULL, "1", 1);
 	if (retval < 0)
 		goto out;
 
 	msleep(100);
 
-	retval = test_sysfs_td4722_b7_amp_open_show(NULL, NULL, buf);
+	retval = td4722_b7_amp_open_show(NULL, NULL, buf);
 	if (retval < 0)
 		goto out;
 
@@ -8487,13 +8435,13 @@ static ssize_t syna_datadump_read(struct file *file, char __user *buf, size_t co
 	if (!data)
 		return -ENOMEM;
 
-	retval = test_sysfs_read_report_store(NULL, NULL, TEST_TYPE_02, strlen(TEST_TYPE_02));
+	retval = read_report_store(NULL, NULL, TEST_TYPE_02, strlen(TEST_TYPE_02));
 	if (retval < 0) {
 		snprintf(data, PAGE_SIZE, "data test error: start\n");
 		goto out;
 	}
 
-	retval = test_sysfs_read_report_show(NULL, NULL, data);
+	retval = read_report_show(NULL, NULL, data);
 	if (retval < 0) {
 		snprintf(data, PAGE_SIZE, "data test error: read\n");
 		goto out;
@@ -8501,13 +8449,13 @@ static ssize_t syna_datadump_read(struct file *file, char __user *buf, size_t co
 
 	cnt += retval;
 
-	retval = test_sysfs_read_report_store(NULL, NULL, TEST_TYPE_03, strlen(TEST_TYPE_03));
+	retval = read_report_store(NULL, NULL, TEST_TYPE_03, strlen(TEST_TYPE_03));
 	if (retval < 0) {
 		snprintf(data, PAGE_SIZE, "data test error: start\n");
 		goto out;
 	}
 
-	retval = test_sysfs_read_report_show(NULL, NULL, data + cnt);
+	retval = read_report_show(NULL, NULL, data + cnt);
 	if (retval < 0) {
 		snprintf(data, PAGE_SIZE, "data test error: read\n");
 		goto out;
@@ -8687,8 +8635,6 @@ static void synaptics_rmi4_test_remove(struct synaptics_rmi4_data *rmi4_data)
 
 exit:
 	complete(&test_remove_complete_force);
-
-	return;
 }
 
 static void synaptics_rmi4_test_reset(struct synaptics_rmi4_data *rmi4_data)
@@ -8796,8 +8742,6 @@ static void __exit rmi4_test_module_exit(void)
 	synaptics_rmi4_new_function_force(&test_module, false);
 
 	wait_for_completion(&test_remove_complete_force);
-
-	return;
 }
 
 module_init(rmi4_test_module_init);
