@@ -36,7 +36,6 @@
  */
 #define MIPI_DSI_MSG_ASYNC_OVERRIDE BIT(4)
 
-#define DSI_MODE_MAX 5
 #define BUF_LEN_MAX    256
 
 #define PANEL_BL_INFO_NUM    4

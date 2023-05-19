@@ -565,6 +565,7 @@ struct dsi_host_common_cfg {
 	enum dsi_phy_type phy_type;
 	struct dsi_split_link_config split_link;
 	u32 byte_intf_clk_div;
+	bool cphy_strength;
 };
 
 /**
