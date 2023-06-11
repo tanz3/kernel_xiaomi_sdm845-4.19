@@ -15,8 +15,7 @@ msm-vidc-objs := msm_v4l2_vidc.o \
                                 hfi_response_handler.o \
                                 hfi_packetization.o \
                                 vidc_hfi.o \
-                                msm_vidc_clocks.o
+                                msm_vidc_clocks.o \
+                                msm_vidc_dyn_gov.o
 
 obj-$(CONFIG_MSM_VIDC_LEGACY_V4L2) := msm-vidc.o
-
-obj-$(CONFIG_MSM_VIDC_LEGACY_V4L2) += governors/
