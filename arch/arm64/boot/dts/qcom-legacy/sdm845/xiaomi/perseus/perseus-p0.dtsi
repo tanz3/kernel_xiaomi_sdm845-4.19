@@ -157,7 +157,7 @@
 
 &mdss_mdp {
 	#cooling-cells = <2>;
-	connectors = <&sde_rscc &sde_wb>;
+	connectors = <&sde_rscc &sde_wb &sde_dsi>;
 };
 
 &labibb {
@@ -190,10 +190,6 @@
 	qcom,mdss-dsi-bl-max-level = <4095>;
 	qcom,platform-reset-gpio = <&tlmm 6 0>;
 	qcom,platform-te-gpio = <&tlmm 10 0>;
-};
-
-&dsi_samsung_fhd_ea8076_cmd_display {
-	qcom,dsi-display-active;
 };
 
 &dsi_sim_vid {
