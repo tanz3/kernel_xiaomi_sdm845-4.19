@@ -245,10 +245,6 @@
 	qcom,platform-reset-gpio = <&tlmm 6 0>;
 };
 
-&dsi_ss_ea8074_notch_fhd_cmd_display {
-	qcom,dsi-display-active;
-};
-
 &red_led {
 	linux,name = "white";
 	qcom,start-idx = <1>;
@@ -294,7 +290,7 @@
 
 &mdss_mdp {
 	#cooling-cells = <2>;
-	connectors = <&sde_rscc &sde_wb>;
+	connectors = <&sde_rscc &sde_wb &sde_dsi>;
 };
 
 &pm8998_l28{
