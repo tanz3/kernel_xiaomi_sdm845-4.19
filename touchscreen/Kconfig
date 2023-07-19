@@ -2,5 +2,6 @@ menu "Touchscreen"
 	depends on INPUT_TOUCHSCREEN
 
 source "techpack/xiaomi-sdm845/touchscreen/focaltech_touch_mi/Kconfig"
+source "techpack/xiaomi-sdm845/touchscreen/ft5x46/Kconfig"
 
 endmenu
