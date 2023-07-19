@@ -7,6 +7,7 @@ source "techpack/xiaomi-sdm845/touchscreen/fts_521/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/ndt/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/nt36xxx/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/synaptics_dsx_force/Kconfig"
+source "techpack/xiaomi-sdm845/touchscreen/xiaomi/Kconfig"
 
 config SECURE_TOUCH
 	bool "Secure Touch"
