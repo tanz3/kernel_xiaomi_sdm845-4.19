@@ -1,0 +1,14 @@
+menu "Xiaomi platform"
+
+config MACH_XIAOMI
+	bool "Support for Xiaomi platform"
+	help
+	  Say Y here to enable support for Xiaomi platform.
+
+if MACH_XIAOMI
+
+source "techpack/xiaomi-sdm845/mach/Kconfig"
+
+endif # MACH_XIAOMI
+
+endmenu
