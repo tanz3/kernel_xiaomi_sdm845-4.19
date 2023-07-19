@@ -5,3 +5,4 @@ obj-$(CONFIG_INPUT_PRESS_NDT) += ndt/
 obj-$(CONFIG_TOUCHSCREEN_NT36XXX)	+= nt36xxx/
 obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_FORCE) += synaptics_dsx_force/
 obj-$(CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE) += xiaomi/
+obj-$(CONFIG_TOUCHSCREEN_ATMEL_MXT_MI)	+= atmel_mxt_ts_mi.o

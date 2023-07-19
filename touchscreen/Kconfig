@@ -16,4 +16,17 @@ config SECURE_TOUCH
 config I2C_BY_DMA
 	bool "I2C BY DMA"
 
+config TOUCHSCREEN_ATMEL_MXT_MI
+	tristate "Atmel mXT I2C Touchscreen"
+	depends on I2C
+	select FW_LOADER
+	help
+	  Say Y here if you have Atmel mXT series I2C touchscreen,
+	  such as AT42QT602240/ATMXT224, connected to your system.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called atmel_mxt_ts.
+
 endmenu
