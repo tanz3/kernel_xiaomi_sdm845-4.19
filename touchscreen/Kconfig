@@ -5,5 +5,13 @@ source "techpack/xiaomi-sdm845/touchscreen/focaltech_touch_mi/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/ft5x46/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/fts_521/Kconfig"
 source "techpack/xiaomi-sdm845/touchscreen/nt36xxx/Kconfig"
+source "techpack/xiaomi-sdm845/touchscreen/synaptics_dsx_force/Kconfig"
+
+config SECURE_TOUCH
+	bool "Secure Touch"
+	depends on TOUCHSCREEN_ST_FTS_V521 || TOUCHSCREEN_SYNAPTICS_DSX_FORCE
+
+config I2C_BY_DMA
+	bool "I2C BY DMA"
 
 endmenu
