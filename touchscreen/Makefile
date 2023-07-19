@@ -1,0 +1,1 @@
+obj-$(CONFIG_TOUCHSCREEN_FTS_MI) += focaltech_touch_mi/
