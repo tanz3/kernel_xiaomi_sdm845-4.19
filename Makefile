@@ -1,6 +1,7 @@
 ifeq ($(CONFIG_MACH_XIAOMI_SDM845),y)
 obj-y += fingerprint/
 obj-y += gps/
+obj-$(CONFIG_HALLS)    += halls/
 obj-$(CONFIG_NEW_LEDS) += leds/
 obj-$(CONFIG_POWER_SUPPLY) += power_supply/
 obj-$(CONFIG_REGULATOR) += regulator/
