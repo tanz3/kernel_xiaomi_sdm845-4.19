@@ -9,6 +9,7 @@ if MACH_XIAOMI
 
 source "techpack/xiaomi-sdm845/mach/Kconfig"
 source "techpack/xiaomi-sdm845/fingerprint/Kconfig"
+source "techpack/xiaomi-sdm845/gps/Kconfig"
 source "techpack/xiaomi-sdm845/leds/Kconfig"
 source "techpack/xiaomi-sdm845/power_supply/Kconfig"
 source "techpack/xiaomi-sdm845/regulator/Kconfig"
