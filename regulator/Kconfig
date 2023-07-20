@@ -1,0 +1,4 @@
+menu "Regulator"
+	depends on REGULATOR
+
+endmenu
