@@ -60,8 +60,8 @@ int dsi_panel_parse_mi_config(struct dsi_panel *panel,
 	mi_cfg->dsi_panel = panel;
 	g_panel = panel;
 
-	mi_cfg->bl_is_big_endian = utils->read_bool(utils->data,
-			"mi,mdss-dsi-bl-dcs-big-endian-type");
+	mi_cfg->bl_is_ss = utils->read_bool(utils->data,
+			"mi,mdss-dsi-bl-dcs-ss-type");
 
 	mi_cfg->mi_feature_enabled = utils->read_bool(of_node,
 			"mi,feature-enabled");
