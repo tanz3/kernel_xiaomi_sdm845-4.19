@@ -1,3 +1,4 @@
+ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_sync
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_utils
 ccflags-y += -I$(srctree)/techpack/camera-legacy/drivers/cam_sync
 
