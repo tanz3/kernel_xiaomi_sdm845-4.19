@@ -54,24 +54,13 @@
 		qcom,mdss-pan-physical-height-dimension = <136>;
 		qcom,cont-splash-enabled;
 		qcom,mdss-dsi-tx-eot-append;
-		qcom,mdss-panel-on-dimming-delay = <120>;
 
-		qcom,dispccbb-enabled;
-		qcom,dispblnotify-enabled;
-		qcom,dispparam-enabled;
-		/*qcom,disp-paneloff-disablecabc-enabled;*/
-		qcom,mdss-night-brightness = <7 25 43 61>;
-		qcom,disp-panel-offon-mode-enabled;
 		qcom,mdss-dsi-panel-hdr-enabled;
 		qcom,mdss-dsi-panel-hdr-color-primaries = <14500 15500 32000
 			17000 15500 30000 8000 3000>;
 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
 		qcom,mdss-dsi-panel-blackness-level = <3230>;
-		qcom,mdss-dsi-panel-xy-coordinate = <0x04 0x3>;
-		qcom,mdss-dsi-panel-max-luminance = <0x01 0x01>;
-		qcom,mdss-dsi-panel-bl-info = <308 545 420 700>;
 
-		qcom,esd-check-enabled;
 		qcom,mdss-dsi-panel-status-check-mode = "reg_read";
 		qcom,mdss-dsi-panel-status-command =
 			[06 01 00 01 00 00 01 0A
@@ -83,9 +72,7 @@
 			 06 01 00 01 00 00 01 AC];
 		qcom,mdss-dsi-panel-status-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-panel-status-value = <0x9c 0x00 0x07 0x00 0xC0 0x02 0x00>;
-		/*qcom,mdss-dsi-panel-on-check-value = <0x9c>;*/
 		qcom,mdss-dsi-panel-status-read-length = <1 1 1 1 1 1 1>;
-		qcom,mdss-panel-off-keep-reset;
 
 		qcom,mdss-dsi-display-timings {
 			timing@0{
@@ -242,61 +229,6 @@
 				qcom,mdss-dsi-displayoff-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-displayon-command-state = "dsi_hs_mode";
 				qcom,mdss-dsi-h-sync-pulse = <1>;
-
-				qcom,mdss-dsi-dispparam-cabcuion-command = [
-					15 01 00 00 00 00 02 55 01
-					15 01 00 00 00 00 02 91 00
-					];
-				qcom,mdss-dsi-dispparam-cabcuion-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-cabcstillon-command = [
-					15 01 00 00 00 00 02 55 02
-					15 01 00 00 00 00 02 91 00
-					];
-				qcom,mdss-dsi-dispparam-cabcstillon-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-cabcmovieon-command = [
-					15 01 00 00 00 00 02 55 03
-					15 01 00 00 00 00 02 91 00
-					];
-				qcom,mdss-dsi-dispparam-cabcmovieon-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-cabcoff-command = [
-					15 01 00 00 00 00 02 55 00
-					15 01 00 00 00 00 02 91 00
-					];
-				qcom,mdss-dsi-dispparam-cabcoff-command-state = "dsi_hs_mode";
-
-				qcom,mdss-dsi-dispparam-skince-cabcuion-command = [
-					15 01 00 00 00 00 02 55 01
-					15 01 00 00 00 00 02 91 80];
-				qcom,mdss-dsi-dispparam-skince-cabcuion-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-skince-cabcstillon-command = [
-					15 00 00 00 00 00 02 55 02
-					15 01 00 00 00 00 02 91 80];
-				qcom,mdss-dsi-dispparam-skince-cabcstillon-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-skince-cabcmovieon-command = [
-					15 01 00 00 00 00 02 55 03
-					15 01 00 00 00 00 02 91 80];
-				qcom,mdss-dsi-dispparam-skince-cabcmovieon-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-skince-cabcoff-command = [
-					15 01 00 00 01 00 02 55 00
-					15 01 00 00 00 00 02 91 80];
-				qcom,mdss-dsi-dispparam-skince-cabcoff-command-state = "dsi_hs_mode";
-
-				qcom,mdss-dsi-dispparam-dimmingon-command = [
-					39 01 00 00 01 00 02 53 2C
-					];
-				qcom,mdss-dsi-dispparam-dimmingon-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-idleon-command = [
-					39 01 00 00 01 00 02 39 00
-					];
-				qcom,mdss-dsi-dispparam-idleoff-command = [
-					39 01 00 00 01 00 02 38 00
-					];
-				qcom,mdss-dsi-dispparam-xy-coordinate-command = [
-					06 01 00 01 05 00 02 A1 00];
-				qcom,mdss-dsi-dispparam-xy-coordinate-command-state = "dsi_hs_mode";
-				qcom,mdss-dsi-dispparam-max-luminance-command = [
-					06 01 00 01 05 00 02 DC 00];
-				qcom,mdss-dsi-dispparam-max-luminance-command-state = "dsi_hs_mode";
 			};
 		};
 	};
