@@ -64,8 +64,6 @@
 			17000 15500 30000 8000 3000>;
 		qcom,mdss-dsi-panel-peak-brightness = <4300000>;
 		qcom,mdss-dsi-panel-blackness-level = <3230>;
-		qcom,mdss-dsi-on-command-tuning;
-		qcom,dispparam-enabled;
 		qcom,mdss-dsi-display-timings {
 			timing@0{
 				qcom,mdss-dsi-panel-width = <1080>;
@@ -100,29 +98,9 @@
 						05 01 00 00 78 00 02 10 00];
 				qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-off-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-doze-hbm-command = [
-						39 01 00 00 00 00 03 51 00 01
-						39 01 00 00 01 00 02 53 22];
-				qcom,mdss-dsi-doze-lbm-command = [
-						39 01 00 00 00 00 03 51 00 01
-						39 01 00 00 01 00 02 53 23];
 				qcom,mdss-dsi-nolp-command = [
 						39 01 00 00 00 00 02 53 25];
-				qcom,mdss-dsi-doze-hbm-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-doze-lbm-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-nolp-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-dispparam-acl-off-command = [39 01 00 00 00 00 02 55 00];
-				qcom,mdss-dsi-dispparam-acl-off-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-dispparam-acl-l1-command = [39 01 00 00 00 00 02 55 01];/*50%*/
-				qcom,mdss-dsi-dispparam-acl-l1-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-dispparam-acl-l2-command = [39 01 00 00 00 00 02 55 02];/*40%*/
-				qcom,mdss-dsi-dispparam-acl-l2-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-dispparam-acl-l3-command = [39 01 00 00 00 00 02 55 03];/*30%*/
-				qcom,mdss-dsi-dispparam-acl-l3-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-dispparam-hbm-off-command = [39 01 00 00 00 00 02 53 25];
-				qcom,mdss-dsi-dispparam-hbm-off-command-state = "dsi_lp_mode";
-				qcom,mdss-dsi-dispparam-hbm-on-command = [39 01 00 00 00 00 02 53 e0];
-				qcom,mdss-dsi-dispparam-hbm-on-command-state = "dsi_lp_mode";
 				qcom,mdss-dsi-h-sync-pulse = <0>;
 			};
 		};
