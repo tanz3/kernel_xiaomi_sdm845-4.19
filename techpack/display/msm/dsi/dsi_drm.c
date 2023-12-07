@@ -6,6 +6,7 @@
 
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_atomic.h>
+#include <drm/drm_notifier_mi.h>
 
 #include "msm_kms.h"
 #include "sde_connector.h"
@@ -165,6 +166,8 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 {
 	int rc = 0;
 	struct dsi_bridge *c_bridge = to_dsi_bridge(bridge);
+	struct mi_drm_notifier notify_data;
+	int power_mode = 0;
 
 	if (!bridge) {
 		DSI_ERR("Invalid params\n");
@@ -187,6 +190,11 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 		       c_bridge->id, rc);
 		return;
 	}
+
+	power_mode = MI_DRM_BLANK_UNBLANK;
+	notify_data.data = &power_mode;
+	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
+	mi_drm_notifier_call_chain(MI_DRM_EARLY_EVENT_BLANK, &notify_data);
 
 	if (c_bridge->dsi_mode.dsi_mode_flags &
 		(DSI_MODE_FLAG_SEAMLESS | DSI_MODE_FLAG_VRR |
@@ -212,6 +220,7 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 				c_bridge->id, rc);
 		(void)dsi_display_unprepare(c_bridge->display);
 	}
+	mi_drm_notifier_call_chain(MI_DRM_EVENT_BLANK, &notify_data);
 	SDE_ATRACE_END("dsi_display_enable");
 
 	rc = dsi_display_splash_res_cleanup(c_bridge->display);
@@ -285,11 +294,18 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 {
 	int rc = 0;
 	struct dsi_bridge *c_bridge = to_dsi_bridge(bridge);
+	struct mi_drm_notifier notify_data;
+	int power_mode = 0;
 
 	if (!bridge) {
 		DSI_ERR("Invalid params\n");
 		return;
 	}
+
+	power_mode = MI_DRM_BLANK_POWERDOWN;
+	notify_data.data = &power_mode;
+	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
+	mi_drm_notifier_call_chain(MI_DRM_EARLY_EVENT_BLANK, &notify_data);
 
 	SDE_ATRACE_BEGIN("dsi_bridge_post_disable");
 	SDE_ATRACE_BEGIN("dsi_display_disable");
@@ -300,6 +316,7 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 		SDE_ATRACE_END("dsi_display_disable");
 		return;
 	}
+	mi_drm_notifier_call_chain(MI_DRM_EVENT_BLANK, &notify_data);
 	SDE_ATRACE_END("dsi_display_disable");
 
 	rc = dsi_display_unprepare(c_bridge->display);
