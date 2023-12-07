@@ -102,6 +102,30 @@ static char dsi_dsc_rc_range_max_qp_1_1_scr1[][15] = {
 static char dsi_dsc_rc_range_bpg_offset[] = {2, 0, 0, -2, -4, -6, -8, -8,
 		-8, -10, -10, -12, -12, -12, -12};
 
+#ifdef CONFIG_MACH_XIAOMI
+static struct dsi_panel *g_panel;
+
+void drm_panel_reset_skip_enable(bool enable)
+{
+	if (g_panel)
+		g_panel->panel_reset_skip = enable;
+}
+
+void drm_dsi_ulps_enable(bool enable)
+{
+	if (g_panel) {
+		g_panel->ulps_feature_enabled = enable;
+		g_panel->ulps_suspend_enabled = enable;
+	}
+}
+
+void drm_dsi_ulps_suspend_enable(bool enable)
+{
+	if (g_panel)
+		g_panel->ulps_suspend_enabled = enable;
+}
+#endif
+
 int dsi_dsc_create_pps_buf_cmd(struct msm_display_dsc_info *dsc, char *buf,
 				int pps_id)
 {
@@ -458,6 +482,20 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
 {
 	int rc = 0;
 
+#ifdef CONFIG_MACH_XIAOMI
+	if (g_panel->panel_reset_skip) {
+		DSI_INFO("%s: panel reset skip\n", __func__);
+
+		if (panel->off_keep_reset) {
+			rc = dsi_panel_reset(panel);
+			if (rc) {
+				DSI_ERR("[%s] failed to reset panel, rc=%d\n", panel->name, rc);
+			}
+		}
+		return rc;
+	}
+#endif
+
 	if (panel->mi_cfg.is_tddi_flag) {
 		if (!panel->mi_cfg.tddi_doubleclick_flag || panel->mi_cfg.panel_dead_flag) {
 			rc = dsi_pwr_enable_regulator(&panel->power_info, true);
@@ -514,19 +552,28 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 {
 	int rc = 0;
 
-	if (gpio_is_valid(panel->reset_config.disp_en_gpio))
-		gpio_set_value(panel->reset_config.disp_en_gpio, 0);
+#ifdef CONFIG_MACH_XIAOMI
+	if (g_panel->panel_reset_skip) {
+			DSI_INFO("%s: panel reset skip\n", __func__);
+			return rc;
+	}
 
-	if (panel->mi_cfg.is_tddi_flag) {
-		if (!panel->mi_cfg.tddi_doubleclick_flag || panel->mi_cfg.panel_dead_flag) {
-			if (gpio_is_valid(panel->reset_config.reset_gpio) &&
+	if (!panel->off_keep_reset) {
+		if (panel->mi_cfg.is_tddi_flag) {
+			if (!panel->mi_cfg.tddi_doubleclick_flag || panel->mi_cfg.panel_dead_flag) {
+				if (gpio_is_valid(panel->reset_config.reset_gpio) &&
 						!panel->reset_gpio_always_on)
 				gpio_set_value(panel->reset_config.reset_gpio, 0);
+			}
+		} else {
+			if (gpio_is_valid(panel->reset_config.reset_gpio))
+				gpio_set_value(panel->reset_config.reset_gpio, 0);
 		}
-	} else {
-		if (gpio_is_valid(panel->reset_config.reset_gpio))
-			gpio_set_value(panel->reset_config.reset_gpio, 0);
 	}
+#endif
+
+	if (gpio_is_valid(panel->reset_config.disp_en_gpio))
+		gpio_set_value(panel->reset_config.disp_en_gpio, 0);
 
 	if (gpio_is_valid(panel->reset_config.lcd_mode_sel_gpio))
 		gpio_set_value(panel->reset_config.lcd_mode_sel_gpio, 0);

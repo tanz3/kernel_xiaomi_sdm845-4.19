@@ -1886,20 +1886,6 @@ static struct drm_driver msm_driver = {
 };
 
 #ifdef CONFIG_PM_SLEEP
-
-static int msm_pm_prepare(struct device *dev)
-{
-	atomic_inc(&resume_pending);
-	return 0;
-}
-
-static void msm_pm_complete(struct device *dev)
-{
-	atomic_set(&resume_pending, 0);
-	wake_up_all(&resume_wait_q);
-	return;
-}
-
 static int msm_pm_suspend(struct device *dev)
 {
 	struct drm_device *ddev;
@@ -1952,6 +1938,19 @@ static int msm_pm_resume(struct device *dev)
 #endif
 
 #ifdef CONFIG_PM
+static int msm_pm_prepare(struct device *dev)
+{
+	atomic_inc(&resume_pending);
+	return 0;
+}
+
+static void msm_pm_complete(struct device *dev)
+{
+	atomic_set(&resume_pending, 0);
+	wake_up_all(&resume_wait_q);
+	return;
+}
+
 static int msm_runtime_suspend(struct device *dev)
 {
 	struct drm_device *ddev = dev_get_drvdata(dev);

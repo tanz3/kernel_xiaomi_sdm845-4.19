@@ -45,11 +45,13 @@ enum {
 
 struct mi_drm_notifier {
 	enum msm_drm_display_id id;
+	bool is_primary;
 	void *data;
 };
 
 int mi_drm_register_client(struct notifier_block *nb);
 int mi_drm_unregister_client(struct notifier_block *nb);
 int mi_drm_notifier_call_chain(unsigned long val, void *v);
+extern void set_skip_panel_dead(bool on);
 
 #endif /*_DRM_NOTIFIER_MI_H*/

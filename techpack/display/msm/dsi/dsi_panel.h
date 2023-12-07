@@ -242,6 +242,9 @@ struct dsi_panel {
 	int panel_test_gpio;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
+
+	bool panel_reset_skip;
+	bool off_keep_reset;
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)

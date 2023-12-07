@@ -73,6 +73,22 @@ static const struct drm_prop_enum_list e_frame_trigger_mode[] = {
 	{FRAME_DONE_WAIT_POSTED_START, "posted_start"},
 };
 
+#ifdef CONFIG_MACH_XIAOMI
+struct sde_connector *primary_c_conn;
+void set_skip_panel_dead(bool on)
+{
+	struct sde_connector *c_conn = primary_c_conn;
+	if (!c_conn) {
+		pr_err("%s: not able to get connector object\n", __func__);
+		return;
+	}
+
+	c_conn->panel_dead_skip = !!on;
+
+	return;
+}
+#endif
+
 static int sde_backlight_device_update_status(struct backlight_device *bd)
 {
 	int brightness;
@@ -2323,6 +2339,13 @@ static void _sde_connector_report_panel_dead(struct sde_connector *conn,
 
 	if (!conn)
 		return;
+
+#ifdef CONFIG_MACH_XIAOMI
+	if (conn->panel_dead_skip) {
+		SDE_ERROR("skip because of panel_dead_skip true\n");
+		return;
+	}
+#endif
 
 	/* Panel dead notification can come:
 	 * 1) ESD thread
