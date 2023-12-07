@@ -184,7 +184,9 @@
 #define FT5X46_INPUT_EVENT_END				5
 
 #define LEN_FLASH_ECC_MAX		0xFFFE
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 #define FT5X46_ESD_CHECK_PERIOD	5000
+#endif
 
 static bool lcd_need_reset;
 static unsigned char proc_operate_mode = FT5X46_PROC_UPGRADE;
@@ -1837,7 +1839,9 @@ int ft5x46_suspend(struct ft5x46_data *ft5x46)
 #endif
 
 	cancel_delayed_work_sync(&ft5x46->noise_filter_delayed_work);
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	cancel_delayed_work_sync(&ft5x46->lcd_esdcheck_work);
+#endif
 #ifdef CONFIG_TOUCHSCREEN_FT5X46P_PROXIMITY
 	cancel_delayed_work_sync(&ft5x46->prox_enable_delayed_work);
 #endif
@@ -1910,8 +1914,10 @@ int ft5x46_resume(struct ft5x46_data *ft5x46)
 	}
 #endif
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	schedule_delayed_work(&ft5x46->lcd_esdcheck_work,
 				msecs_to_jiffies(FT5X46_ESD_CHECK_PERIOD));
+#endif
 
 out:
 	mutex_unlock(&ft5x46->mutex);
@@ -2247,7 +2253,9 @@ static int ft5x46_enter_factory(struct ft5x46_data *ft5x46_ts)
 	u8 reg_val;
 	int error;
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	cancel_delayed_work_sync(&ft5x46_ts->lcd_esdcheck_work);
+#endif
 
 	error = ft5x46_write_byte(ft5x46_ts, FT5X0X_REG_DEVIDE_MODE,
 							FT5X0X_DEVICE_MODE_TEST);
@@ -2282,8 +2290,10 @@ static int ft5x46_enter_work(struct ft5x46_data *ft5x46_ts)
 		return -EPERM;
 	}
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	schedule_delayed_work(&ft5x46_ts->lcd_esdcheck_work,
 				msecs_to_jiffies(FT5X46_ESD_CHECK_PERIOD));
+#endif
 
 	return 0;
 }
@@ -2716,6 +2726,7 @@ static ssize_t ft5x46_panel_vendor_show(struct device *dev,
 	return count;
 }
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 static ssize_t ft5x46_lcd_esd_test(struct device *dev,
 				struct device_attribute *attr,
 				const char *buf, size_t count)
@@ -2736,6 +2747,7 @@ static ssize_t ft5x46_lcd_esd_test(struct device *dev,
 
 	return error ? : count;
 }
+#endif
 
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 static struct xiaomi_touch_interface xiaomi_touch_interfaces;
@@ -2821,7 +2833,9 @@ static DEVICE_ATTR(prox_rawdata, 0444, ft5x46_prox_rawdata_show, NULL);
 static DEVICE_ATTR(irq_enable, 0644, ft5x46_irq_enable_show, ft5x46_irq_enable_store);
 static DEVICE_ATTR(panel_vendor, 0644, ft5x46_panel_vendor_show, NULL);
 #endif
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 static DEVICE_ATTR(esd_test, 0644, NULL, ft5x46_lcd_esd_test);
+#endif
 
 static struct attribute *ft5x46_attrs[] = {
 	&dev_attr_tpfwver.attr,
@@ -2840,7 +2854,9 @@ static struct attribute *ft5x46_attrs[] = {
 #endif
 	&dev_attr_irq_enable.attr,
 	&dev_attr_panel_vendor.attr,
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	&dev_attr_esd_test.attr,
+#endif
 	NULL
 };
 
@@ -3779,9 +3795,11 @@ void ft5x46_hw_init_work(struct work_struct *work)
 	ft5x46_enable_irq(ft5x46);
 	ft5x46->hw_is_ready = true;
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	queue_delayed_work(ft5x46->lcd_esdcheck_workqueue,
 						&ft5x46->lcd_esdcheck_work,
 						msecs_to_jiffies(FT5X46_ESD_CHECK_PERIOD));
+#endif
 
 	set_skip_panel_dead(false);
 
@@ -4006,6 +4024,7 @@ static const struct file_operations ft5x46_lockdown_info_ops = {
 	.read		= ft5x46_lockdown_info_read,
 };
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 int idc_esdcheck_lcderror(struct ft5x46_data *ft5x46)
 {
 	u8 val;
@@ -4046,6 +4065,7 @@ static void esdcheck_func(struct work_struct *work)
 							msecs_to_jiffies(FT5X46_ESD_CHECK_PERIOD));
 	}
 }
+#endif
 
 struct ft5x46_data *ft5x46_probe(struct device *dev,
 				const struct ft5x46_bus_ops *bops)
@@ -4339,12 +4359,14 @@ struct ft5x46_data *ft5x46_probe(struct device *dev,
 	INIT_DELAYED_WORK(&ft5x46->noise_filter_delayed_work,
 				ft5x46_noise_filter_delayed_work);
 
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	INIT_DELAYED_WORK(&ft5x46->lcd_esdcheck_work, esdcheck_func);
 	ft5x46->lcd_esdcheck_workqueue = create_workqueue("touch_lcd_esdcheck_wq");
 	if (!ft5x46->lcd_esdcheck_workqueue) {
 		dev_err(dev, "Failed to create lcd esd workqueue\n");
 		goto err_sysfs_create_virtualkeys;
 	}
+#endif
 #ifdef CONFIG_TOUCHSCREEN_FT5X46P_PROXIMITY
 	INIT_DELAYED_WORK(&ft5x46->prox_enable_delayed_work,
 				ft5x46_prox_enable_delayed_work);
@@ -4461,7 +4483,9 @@ void ft5x46_remove(struct ft5x46_data *ft5x46)
 	cancel_delayed_work_sync(&ft5x46->prox_enable_delayed_work);
 #endif
 	cancel_delayed_work_sync(&ft5x46->noise_filter_delayed_work);
+#ifdef CONFIG_FT5X46_ENABLE_ESD
 	cancel_delayed_work_sync(&ft5x46->lcd_esdcheck_work);
+#endif
 	power_supply_unreg_notifier(&ft5x46->power_supply_notifier);
 	if (ft5x46->vkeys_dir)
 		sysfs_remove_file(ft5x46->vkeys_dir, &ft5x46->vkeys_attr.attr);
