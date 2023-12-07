@@ -27,7 +27,7 @@
 #include <linux/power_supply.h>
 
 #ifdef CONFIG_DRM
-#include <drm/drm_notifier.h>
+#include <drm/drm_notifier_mi.h>
 #endif
 #include <linux/reboot.h>
 
@@ -1439,7 +1439,7 @@ static int wireless_fb_notifier_cb(struct notifier_block *self,
 		unsigned long event, void *data)
 {
 
-	struct drm_notify_data *evdata = data;
+	struct mi_drm_notifier *evdata = data;
 	int *blank;
 
 	struct idtp9220_device_info *di =
@@ -1447,14 +1447,14 @@ static int wireless_fb_notifier_cb(struct notifier_block *self,
 
 	mutex_lock(&di->screen_lock);
 	if (evdata && evdata->data && di) {
-		if (event == DRM_EARLY_EVENT_BLANK) {
+		if (event == MI_DRM_EARLY_EVENT_BLANK) {
 			blank = evdata->data;
-			if (*blank == DRM_BLANK_UNBLANK) {
+			if (*blank == MI_DRM_BLANK_UNBLANK) {
 				di->screen_on = true;
 				pr_info("%s: screen_on\n", __func__);
 				if (di->status == FULL_MODE)
 					idtp922x_set_pmi_icl(di, DC_FUL_CURRENT);
-			} else if (*blank == DRM_BLANK_POWERDOWN) {
+			} else if (*blank == MI_DRM_BLANK_POWERDOWN) {
 				di->screen_on = false;
 				pr_info("%s: screen_off\n", __func__);
 				if (di->status == FULL_MODE)
@@ -1567,7 +1567,7 @@ static int idtp9220_probe(struct i2c_client *client,
 #ifdef CONFIG_DRM
 		if (&di->wireless_fb_notif) {
 			di->wireless_fb_notif.notifier_call = wireless_fb_notifier_cb;
-			rc = drm_register_client(&di->wireless_fb_notif);
+			rc = mi_drm_register_client(&di->wireless_fb_notif);
 			if (rc < 0) {
 				dev_err(di->dev,
 					"Couldn't register notifier rc=%d\n", rc);

@@ -56,7 +56,7 @@
 
 #include <linux/notifier.h>
 #ifdef CONFIG_DRM
-#include <drm/drm_notifier.h>
+#include <drm/drm_notifier_mi.h>
 #include <drm/drm_panel.h>
 #endif
 #include <linux/backlight.h>
@@ -1141,7 +1141,7 @@ static ssize_t stm_fts_cmd_show(struct device *dev,
 			goto END;
 		}
 #ifdef CONFIG_DRM
-		res = drm_unregister_client(&info->notifier);
+		res = mi_drm_unregister_client(&info->notifier);
 		if (res < 0) {
 			logError(1, "%s ERROR: unregister notifier failed!\n",
 				 tag);
@@ -1367,7 +1367,7 @@ static ssize_t stm_fts_cmd_show(struct device *dev,
 
 	}
 #ifdef CONFIG_DRM
-	if (drm_register_client(&info->notifier) < 0) {
+	if (mi_drm_register_client(&info->notifier) < 0) {
 		logError(1, "%s ERROR: register notifier failed!\n", tag);
 	}
 #endif
@@ -4804,13 +4804,13 @@ static int fts_drm_state_chg_callback(struct notifier_block *nb,
 		blank = *(int *)(evdata->data);
 
 		flush_workqueue(info->event_wq);
-		if (val == DRM_EARLY_EVENT_BLANK && blank == DRM_BLANK_POWERDOWN) {
+		if (val == MI_DRM_EARLY_EVENT_BLANK && blank == MI_DRM_BLANK_POWERDOWN) {
 			if (info->sensor_sleep)
 				return NOTIFY_OK;
 
 			logError(0, "%s %s: DRM_BLANK_POWERDOWN\n", tag, __func__);
 			queue_work(info->event_wq, &info->suspend_work);
-		} else if (val == DRM_EVENT_BLANK && blank == DRM_BLANK_UNBLANK) {
+		} else if (val == MI_DRM_EVENT_BLANK && blank == MI_DRM_BLANK_UNBLANK) {
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE_SENSOR
 			if (!info->sensor_sleep && !info->p_sensor_switch)
 				return NOTIFY_OK;
@@ -4819,7 +4819,7 @@ static int fts_drm_state_chg_callback(struct notifier_block *nb,
 				return NOTIFY_OK;
 #endif
 
-			logError(0, "%s %s: DRM_BLANK_UNBLANK\n", tag, __func__);
+			logError(0, "%s %s: MI_DRM_BLANK_UNBLANK\n", tag, __func__);
 			queue_work(info->event_wq, &info->resume_work);
 		}
 	}

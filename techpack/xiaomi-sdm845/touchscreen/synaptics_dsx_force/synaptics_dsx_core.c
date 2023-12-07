@@ -58,7 +58,7 @@
 #include <linux/debugfs.h>
 #include <linux/uaccess.h>
 #endif
-#include <drm/drm_notifier.h>
+#include <drm/drm_notifier_mi.h>
 #include <drm/drm_panel.h>
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
 #include <../xiaomi/xiaomi_touch.h>
@@ -5465,7 +5465,7 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 		rmi4_data->drm_notifier.notifier_call = synaptics_rmi4_drm_notifier_cb;
 	else
 		rmi4_data->drm_notifier.notifier_call = synaptics_rmi4_drm_notifier_cb_tddi;
-	retval = drm_register_client(&rmi4_data->drm_notifier);
+	retval = mi_drm_register_client(&rmi4_data->drm_notifier);
 	if (retval < 0) {
 		dev_err(&pdev->dev,
 				"%s: Failed to register fb notifier client\n",
@@ -5664,7 +5664,7 @@ err_virtual_buttons:
 
 err_enable_irq:
 #ifdef CONFIG_DRM
-	drm_unregister_client(&rmi4_data->drm_notifier);
+	mi_drm_unregister_client(&rmi4_data->drm_notifier);
 #endif
 
 #ifdef USE_EARLYSUSPEND
@@ -5763,7 +5763,7 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 	synaptics_rmi4_irq_enable(rmi4_data, false, false);
 
 #ifdef CONFIG_DRM
-	drm_unregister_client(&rmi4_data->drm_notifier);
+	mi_drm_unregister_client(&rmi4_data->drm_notifier);
 #endif
 
 #ifdef USE_EARLYSUSPEND
@@ -6083,7 +6083,7 @@ static int synaptics_rmi4_drm_notifier_cb(struct notifier_block *self,
 		unsigned long event, void *data)
 {
 	int *transition;
-	struct drm_notify_data *evdata = data;
+	struct mi_drm_notifier *evdata = data;
 	struct synaptics_rmi4_data *rmi4_data =
 			container_of(self, struct synaptics_rmi4_data,
 			drm_notifier);
@@ -6097,12 +6097,12 @@ static int synaptics_rmi4_drm_notifier_cb(struct notifier_block *self,
 
 	/* Receive notifications from primary panel only */
 	if (evdata && evdata->data && rmi4_data && evdata->is_primary) {
-		if (event == DRM_EVENT_BLANK) {
+		if (event == MI_DRM_EVENT_BLANK) {
 			transition = evdata->data;
-			if (*transition == DRM_BLANK_POWERDOWN) {
+			if (*transition == MI_DRM_BLANK_POWERDOWN) {
 				synaptics_rmi4_suspend(&rmi4_data->pdev->dev);
 				rmi4_data->fb_ready = false;
-			} else if (*transition == DRM_BLANK_UNBLANK) {
+			} else if (*transition == MI_DRM_BLANK_UNBLANK) {
 				synaptics_rmi4_resume(&rmi4_data->pdev->dev);
 				rmi4_data->fb_ready = true;
 				if (rmi4_data->wakeup_en) {
@@ -6114,9 +6114,9 @@ static int synaptics_rmi4_drm_notifier_cb(struct notifier_block *self,
 
 				rmi4_data->disable_data_dump = false;
 			}
-		} else if (event == DRM_EARLY_EVENT_BLANK) {
+		} else if (event == MI_DRM_EARLY_EVENT_BLANK) {
 			transition = evdata->data;
-			if (*transition == DRM_BLANK_POWERDOWN) {
+			if (*transition == MI_DRM_BLANK_POWERDOWN) {
 				rmi4_data->disable_data_dump = true;
 				if (rmi4_data->dump_flags) {
 					reinit_completion(&rmi4_data->dump_completion);
@@ -6129,7 +6129,7 @@ static int synaptics_rmi4_drm_notifier_cb(struct notifier_block *self,
 					drm_panel_reset_skip_enable(true);
 					drm_dsi_ulps_enable(true);
 				}
-			} else if (*transition == DRM_BLANK_UNBLANK) {
+			} else if (*transition == MI_DRM_BLANK_UNBLANK) {
 				if (bdata->reset_gpio >= 0 && rmi4_data->suspend) {
 					gpio_set_value(bdata->reset_gpio, bdata->reset_on_state);
 					msleep(bdata->reset_active_ms);

@@ -29,7 +29,7 @@
 #include <linux/notifier.h>
 #include <linux/fb.h>
 #ifdef CONFIG_DRM
-#include <drm/drm_notifier.h>
+#include <drm/drm_notifier_mi.h>
 #endif
 #include <linux/proc_fs.h>
 #include <linux/uaccess.h>
@@ -5590,16 +5590,16 @@ static int drm_notifier_cb(struct notifier_block *self,
 	/* Receive notifications from primary panel only */
 	if (evdata && evdata->data && mxt_data /*&& mdss_panel_is_prim(evdata->info)*/) {
 		blank = evdata->data;
-		if (event == DRM_EVENT_BLANK) {
-			if (*blank == DRM_BLANK_UNBLANK) {
+		if (event == MI_DRM_EVENT_BLANK) {
+			if (*blank == MI_DRM_BLANK_UNBLANK) {
 				schedule_delayed_work(&mxt_data->calibration_delayed_work, msecs_to_jiffies(100));
 			}
-		} else if (event == DRM_EARLY_EVENT_BLANK) {
+		} else if (event == MI_DRM_EARLY_EVENT_BLANK) {
 			blank = evdata->data;
-			if (*blank == DRM_BLANK_UNBLANK) {
+			if (*blank == MI_DRM_BLANK_UNBLANK) {
 				dev_dbg(&mxt_data->client->dev, "##### UNBLANK SCREEN #####\n");
 				mxt_input_enable(mxt_data->input_dev);
-			} else if (*blank == DRM_BLANK_POWERDOWN) {
+			} else if (*blank == MI_DRM_BLANK_POWERDOWN) {
 				dev_dbg(&mxt_data->client->dev, "##### BLANK SCREEN #####\n");
 				mxt_input_disable(mxt_data->input_dev);
 			}
@@ -5612,7 +5612,7 @@ static int drm_notifier_cb(struct notifier_block *self,
 static void configure_sleep(struct mxt_data *data)
 {
 	data->notif.notifier_call = drm_notifier_cb;
-	if (drm_register_client(&data->notif) < 0) {
+	if (mi_drm_register_client(&data->notif) < 0) {
 		dev_err(&data->client->dev, "Unable to register notifier\n");
 	}
 }
