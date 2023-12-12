@@ -831,6 +831,9 @@ static int cam_vfe_camif_handle_irq_bottom_half(void *handler_priv,
 				CAM_ISP_HW_EVENT_SOF, (void *)&evt_info);
 
 		ret = CAM_VFE_IRQ_STATUS_SUCCESS;
+		payload->irq_reg_val[CAM_IFE_IRQ_CAMIF_REG_STATUS0] &=
+				~(camif_priv->reg_data->sof_irq_mask);
+			cam_vfe_put_evt_payload(payload->core_info, &payload);
 	}
 
 	if (irq_status0 & camif_priv->reg_data->reg_update_irq_mask) {
@@ -841,6 +844,9 @@ static int cam_vfe_camif_handle_irq_bottom_half(void *handler_priv,
 				CAM_ISP_HW_EVENT_REG_UPDATE, (void *)&evt_info);
 
 		ret = CAM_VFE_IRQ_STATUS_SUCCESS;
+		payload->irq_reg_val[CAM_IFE_IRQ_CAMIF_REG_STATUS0] &=
+				~(camif_priv->reg_data->reg_update_irq_mask);
+			cam_vfe_put_evt_payload(payload->core_info, &payload);
 	}
 
 	if (irq_status0 & camif_priv->reg_data->epoch0_irq_mask) {
@@ -855,6 +861,9 @@ static int cam_vfe_camif_handle_irq_bottom_half(void *handler_priv,
 				CAM_ISP_HW_EVENT_EPOCH, (void *)&evt_info);
 
 		ret = CAM_VFE_IRQ_STATUS_SUCCESS;
+		payload->irq_reg_val[CAM_IFE_IRQ_CAMIF_REG_STATUS0] &=
+				~(camif_priv->reg_data->epoch0_irq_mask);
+			cam_vfe_put_evt_payload(payload->core_info, &payload);
 	}
 
 	if (irq_status0 & camif_priv->reg_data->error_irq_mask0) {

@@ -6,7 +6,6 @@
 
 #include <linux/module.h>
 #include <linux/firmware.h>
-#include <linux/dma-contiguous.h>
 #include <cam_sensor_cmn_header.h>
 #include "cam_actuator_core.h"
 #include "cam_sensor_util.h"

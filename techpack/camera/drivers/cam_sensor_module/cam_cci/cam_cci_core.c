@@ -1821,8 +1821,8 @@ static int32_t cam_cci_write(struct v4l2_subdev *sd,
 	case MSM_CCI_I2C_WRITE:
 	case MSM_CCI_I2C_WRITE_SEQ:
 	case MSM_CCI_I2C_WRITE_BURST:
-#ifndef CONFIG_MACH_XIAOMI
 		if (!c_ctrl->force_low_priority) {
+#ifndef CONFIG_MACH_XIAOMI
 			for (i = 0; i < NUM_QUEUES; i++) {
 				if (mutex_trylock(
 					&cci_master_info->mutex_q[i])) {

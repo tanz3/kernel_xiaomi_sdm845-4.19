@@ -47,7 +47,7 @@ ssize_t mv_operate_sensor_write_regs_store(struct device *dev,
 		ir_reg_array.reg_data = sensor_write_regs_data;
 
 		rc = camera_io_dev_write(&(s_ctrl->io_master_info),
-		&ir_write_setting);
+		&ir_write_setting, false);
 		if (rc < 0)
 			CAM_ERR(CAM_SENSOR,"%s: can not write IR camera sensor reg!\n", __func__);
 		}
@@ -1272,7 +1272,7 @@ int32_t cam_sensor_driver_cmd(struct cam_sensor_ctrl_t *s_ctrl,
 
 		user_reg_setting.reg_setting = i2c_reg_setting;
 
-		rc = camera_io_dev_write(&s_ctrl->io_master_info, &user_reg_setting);
+		rc = camera_io_dev_write(&s_ctrl->io_master_info, &user_reg_setting, false);
 		if (rc < 0)
 			CAM_ERR(CAM_SENSOR, "Write setting failed, rc = %d\n", rc);
 	}

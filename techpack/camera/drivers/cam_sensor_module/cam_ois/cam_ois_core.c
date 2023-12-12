@@ -317,7 +317,7 @@ static int cam_ois_fw_init0(struct cam_ois_ctrl_t *o_ctrl)
 	write_setting.reg_setting = ois_init0_array;
 
 	rc = camera_io_dev_write(&(o_ctrl->io_master_info),
-		&write_setting);
+		&write_setting, false);
 	if (rc < 0) {
 		CAM_ERR(CAM_OIS,
 			"{dipper-debug-ois}Failed in Applying i2c wrt settings");
