@@ -5250,6 +5250,8 @@ static int dsi_display_bind(struct device *dev,
 		goto error_host_deinit;
 	}
 
+	primary_display = display;
+
 	DSI_INFO("Successfully bind display panel '%s'\n", display->name);
 	display->drm_dev = drm;
 

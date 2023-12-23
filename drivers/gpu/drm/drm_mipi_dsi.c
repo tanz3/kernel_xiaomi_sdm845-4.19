@@ -1073,7 +1073,7 @@ EXPORT_SYMBOL(mipi_dsi_dcs_set_display_brightness);
 
 /**
  * mipi_dsi_dcs_set_display_brightness_ss() - sets the brightness value of the
- * display with big endian, high byte to 1st parameter, low byte to 2nd parameter
+ * display with ss, high byte to 1st parameter, low byte to 2nd parameter
  * @dsi: DSI peripheral device
  * @brightness: brightness value
  *
@@ -1092,7 +1092,7 @@ int mipi_dsi_dcs_set_display_brightness_ss(struct mipi_dsi_device *dsi,
 
 	return 0;
 }
-EXPORT_SYMBOL(mipi_dsi_dcs_set_display_brightness_big_endian);
+EXPORT_SYMBOL(mipi_dsi_dcs_set_display_brightness_ss);
 
 /**
  * mipi_dsi_dcs_get_display_brightness() - gets the current brightness value
